@@ -19,7 +19,8 @@ require(['/api/config'], function (ApiConfig) {
 });
 define([
     'jquery',
-    '/bower_components/hyperjson/hyperjson.js',
+    // '/bower_components/hyperjson/hyperjson.js',
+    '/common/flat-dom.js',
     '/common/sframe-app-framework.js',
     '/common/cursor.js',
     '/common/TypingTests.js',
@@ -471,7 +472,7 @@ define([
 
         // apply patches, and try not to lose the cursor in the process!
         framework.onContentUpdate(function (hjson) {
-            if (!Array.isArray(hjson)) { throw new Error(Messages.typeError); }
+            //if (!Array.isArray(hjson)) { throw new Error(Messages.typeError); }
             var userDocStateDom = hjsonToDom(hjson);
 
             userDocStateDom.setAttribute("contenteditable",
@@ -620,15 +621,8 @@ define([
         }, true);
 
         framework.setNormalizer(function (hjson) {
-            return [
-                'BODY',
-                {
-                    "class": "cke_editable cke_editable_themed cke_contents_ltr cke_show_borders",
-                    "contenteditable": "true",
-                    "spellcheck":"false"
-                },
-                hjson[2]
-            ];
+            console.log(hjson);
+            return hjson;
         });
 
         /* hitting enter makes a new line, but places the cursor inside
