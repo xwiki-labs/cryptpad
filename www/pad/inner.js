@@ -19,7 +19,7 @@ require(['/api/config'], function (ApiConfig) {
 });
 define([
     'jquery',
-    // '/bower_components/hyperjson/hyperjson.js',
+    '/bower_components/hyperjson/hyperjson.js',
     '/common/flat-dom.js',
     '/common/sframe-app-framework.js',
     '/common/cursor.js',
@@ -42,6 +42,7 @@ define([
 ], function (
     $,
     Hyperjson,
+    FlatDom,
     Framework,
     Cursor,
     TypingTest,
@@ -71,7 +72,13 @@ define([
     };
 
     var hjsonToDom = function (H) {
-        var dom = Hyperjson.toDOM(H);
+        var dom;
+        if (Array.isArray(H)) {
+            // Old pad, use Hyperjson to get the DOM
+            dom = Hyperjson.toDOM(H);
+        } else {
+            dom = FlatDom.toDOM(H);
+        }
         removeListeners(dom);
         return dom;
     };
@@ -519,7 +526,7 @@ define([
         framework.setContentGetter(function () {
             displayMediaTags(framework, inner, mediaTagMap);
             inner.normalize();
-            return Hyperjson.fromDOM(inner, shouldSerialize, hjsonFilters);
+            return FlatDom.fromDOM(inner, shouldSerialize, hjsonFilters);
         });
 
         $bar.find('#cke_1_toolbar_collapser').hide();
@@ -594,7 +601,7 @@ define([
         };
         framework.setFileImporter({ accept: 'text/html' }, function (content, f, cb) {
             importMediaTags(domFromHTML(content).body, function (dom) {
-                cb(Hyperjson.fromDOM(dom));
+                cb(FlatDom.fromDOM(dom));
             });
         }, true);
 
@@ -672,7 +679,7 @@ define([
             Framework.create({
                 toolbarContainer: '#cke_1_toolbox',
                 contentContainer: '#cke_editor1 > .cke_inner',
-                patchTransformer: ChainPad.NaiveJSONTransformer,
+                //patchTransformer: ChainPad.NaiveJSONTransformer,
                 /*thumbnail: {
                     getContainer: function () { return $('iframe').contents().find('html')[0]; },
                     filter: function (el, before) {
