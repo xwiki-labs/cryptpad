@@ -1,16 +1,14 @@
-@import (once) "../../customize/src/less2/include/browser.less";
-@import (once) "../../customize/src/less2/include/markdown.less";
-@import (once) "../../customize/src/less2/include/framework.less";
+@import (reference) "../../customize/src/less2/include/browser.less";
+@import (reference) "../../customize/src/less2/include/markdown.less";
+@import (reference) "../../customize/src/less2/include/framework.less";
 
-
-.framework_main(
-    @bg-color: @colortheme_code-bg,
-    @warn-color: @colortheme_code-warn,
-    @color: @colortheme_code-color
-);
-
-// body
 &.cp-app-code {
+    .framework_main(
+        @bg-color: @colortheme_code-bg,
+        @warn-color: @colortheme_code-warn,
+        @color: @colortheme_code-color
+    );
+
     display: flex;
     flex-flow: column;
     max-height: 100%;
@@ -21,17 +19,16 @@
         flex-flow: column;
         height: 100%;
         min-height: 100%;
-        width: 50%;
         min-width: 20%;
         max-width: 80%;
         resize: horizontal;
         overflow: hidden;
+        width: 50%;
         &.cp-app-code-fullpage {
             max-width: 100%;
             resize: none;
             flex: 1;
         }
-
     }
     .CodeMirror {
         flex: 1;
@@ -53,9 +50,13 @@
             #cp-app-code-container { display: none; }
             #cp-app-code-preview { border: 0; }
         }
+        &.cp-chat-visible {
+            #cp-app-code-container {
+                width: 35%;
+            }
+        }
     }
     #cp-app-code-preview {
-        flex: 1;
         padding: 5px 20px;
         overflow: auto;
         display: inline-block;
@@ -65,6 +66,7 @@
         font-family: Calibri,Ubuntu,sans-serif;
         word-wrap: break-word;
         position: relative;
+        flex: 1;
         media-tag {
             * {
                 max-width:100%;

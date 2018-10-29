@@ -36,11 +36,25 @@ define([
         };
         window.addEventListener('message', onMsg);
     }).nThen(function (/*waitFor*/) {
-        var getSecrets = function (Cryptpad, Utils, cb) {
-            var hash = window.location.hash.slice(1) || Utils.LocalStore.getUserHash() ||
-                        Utils.LocalStore.getFSHash();
-            // No password for drive
-            cb(null, Utils.Hash.getSecrets('drive', hash));
+        var afterSecrets = function (Cryptpad, Utils, secret, cb) {
+            var hash = window.location.hash.slice(1);
+            if (hash && Utils.LocalStore.isLoggedIn()) {
+                // Add a shared folder!
+                Cryptpad.addSharedFolder(secret, function (id) {
+                    window.CryptPad_newSharedFolder = id;
+                    cb();
+                });
+                return;
+            } else if (hash) {
+                var id = Utils.Util.createRandomInteger();
+                window.CryptPad_newSharedFolder = id;
+                var data = {
+                    href: Utils.Hash.getRelativeHref(window.location.href),
+                    password: secret.password
+                };
+                return void Cryptpad.loadSharedFolder(id, data, cb);
+            }
+            cb();
         };
         var addRpc = function (sframeChan, Cryptpad, Utils) {
             sframeChan.on('EV_BURN_ANON_DRIVE', function () {
@@ -52,7 +66,16 @@ define([
             sframeChan.on('Q_DRIVE_USEROBJECT', function (data, cb) {
                 Cryptpad.userObjectCommand(data, cb);
             });
+            sframeChan.on('Q_DRIVE_RESTORE', function (data, cb) {
+                Cryptpad.restoreDrive(data, cb);
+            });
             sframeChan.on('Q_DRIVE_GETOBJECT', function (data, cb) {
+                if (data && data.sharedFolder) {
+                    Cryptpad.getSharedFolder(data.sharedFolder, function (obj) {
+                        cb(obj);
+                    });
+                    return;
+                }
                 Cryptpad.getUserObject(function (obj) {
                     cb(obj);
                 });
@@ -62,6 +85,15 @@ define([
                     if (err) { return void console.error(err); }
                     cb(obj);
                 });
+            });
+            sframeChan.on('EV_DRIVE_SET_HASH', function (hash) {
+                // Update the hash in the address bar
+                if (!Utils.LocalStore.isLoggedIn()) { return; }
+                var ohc = window.onhashchange;
+                window.onhashchange = function () {};
+                window.location.hash = hash || '';
+                window.onhashchange = ohc;
+                ohc({reset:true});
             });
             Cryptpad.onNetworkDisconnect.reg(function () {
                 sframeChan.event('EV_NETWORK_DISCONNECT');
@@ -80,10 +112,12 @@ define([
             });
         };
         SFCommonO.start({
-            getSecrets: getSecrets,
+            afterSecrets: afterSecrets,
             noHash: true,
+            noRealtime: true,
             driveEvents: true,
-            addRpc: addRpc
+            addRpc: addRpc,
+            isDrive: true,
         });
     });
 });

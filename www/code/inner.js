@@ -8,6 +8,7 @@ define([
     '/common/common-util.js',
     '/common/common-hash.js',
     '/common/modes.js',
+    '/common/visible.js',
     '/customize/messages.js',
     'cm/lib/codemirror',
 
@@ -37,6 +38,8 @@ define([
     'cm/addon/fold/comment-fold',
     'cm/addon/display/placeholder',
 
+    'less!/code/app-code.less'
+
 ], function (
     $,
     DiffMd,
@@ -47,6 +50,7 @@ define([
     Util,
     Hash,
     Modes,
+    Visible,
     Messages,
     CMeditor)
 {
@@ -108,7 +112,7 @@ define([
                     return;
                 }
                 $previewContainer.removeClass('cp-app-code-preview-isempty');
-                DiffMd.apply(DiffMd.render(editor.getValue()), $preview);
+                DiffMd.apply(DiffMd.render(editor.getValue()), $preview, framework._.sfCommon);
             } catch (e) { console.error(e); }
         };
         var drawPreview = Util.throttle(function () {
@@ -220,6 +224,12 @@ define([
             }
         });
 
+        Visible.onChange(function (visible) {
+            if (visible) {
+                drawPreview();
+            }
+        });
+
         return {
             forceDraw: forceDrawPreview,
             draw: drawPreview,
@@ -229,24 +239,28 @@ define([
     };
 
     var mkIndentSettings = function (editor, metadataMgr) {
-        var setIndentation = function (units, useTabs) {
+        var setIndentation = function (units, useTabs, fontSize) {
             if (typeof(units) !== 'number') { return; }
             editor.setOption('indentUnit', units);
             editor.setOption('tabSize', units);
             editor.setOption('indentWithTabs', useTabs);
+            $('.CodeMirror').css('font-size', fontSize+'px');
         };
 
         var indentKey = 'indentUnit';
         var useTabsKey = 'indentWithTabs';
+        var fontKey = 'fontSize';
         var updateIndentSettings = function () {
             if (!metadataMgr) { return; }
             var data = metadataMgr.getPrivateData().settings;
             data = data.codemirror || {};
             var indentUnit = data[indentKey];
             var useTabs = data[useTabsKey];
+            var fontSize = data[fontKey];
             setIndentation(
-                typeof(indentUnit) === 'number'? indentUnit: 2,
-                typeof(useTabs) === 'boolean'? useTabs: false);
+                typeof(indentUnit) === 'number'? indentUnit : 2,
+                typeof(useTabs) === 'boolean'? useTabs : false,
+                typeof(fontSize) === 'number' ? fontSize : 12);
         };
         metadataMgr.onChangeLazy(updateIndentSettings);
         updateIndentSettings();
@@ -331,14 +345,11 @@ define([
                 dropArea: $('.CodeMirror'),
                 body: $('body'),
                 onUploaded: function (ev, data) {
-                    //var cursor = editor.getCursor();
-                    //var cleanName = data.name.replace(/[\[\]]/g, '');
-                    //var text = '!['+cleanName+']('+data.url+')';
-                    // PASSWORD_FILES
                     var parsed = Hash.parsePadUrl(data.url);
-                    var hexFileName = Util.base64ToHex(parsed.hashData.channel);
-                    var src = '/blob/' + hexFileName.slice(0,2) + '/' + hexFileName;
-                    var mt = '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + parsed.hashData.key + '"></media-tag>';
+                    var secret = Hash.getSecrets('file', parsed.hash, data.password);
+                    var src = Hash.getBlobPathFromHex(secret.channel);
+                    var key = Hash.encodeBase64(secret.keys.cryptKey);
+                    var mt = '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + key + '"></media-tag>';
                     editor.replaceSelection(mt);
                 }
             };

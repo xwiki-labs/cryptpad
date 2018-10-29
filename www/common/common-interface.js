@@ -1,3 +1,12 @@
+if (!document.querySelector("#alertifyCSS")) {
+    // Prevent alertify from injecting CSS, we create our own in alertify.less.
+    // see: https://github.com/alertifyjs/alertify.js/blob/v1.0.11/src/js/alertify.js#L414
+    var head = document.getElementsByTagName("head")[0];
+    var css = document.createElement("span");
+    css.id = "alertifyCSS";
+    css.setAttribute('data-but-why', 'see: common-interface.js');
+    head.insertBefore(css, head.firstChild);
+}
 define([
     'jquery',
     '/customize/messages.js',
@@ -7,7 +16,6 @@ define([
     '/customize/application_config.js',
     '/bower_components/alertifyjs/dist/js/alertify.js',
     '/common/tippy/tippy.min.js',
-    '/customize/pages.js',
     '/common/hyperscript.js',
     '/customize/loading.js',
     '/common/test.js',
@@ -17,7 +25,7 @@ define([
     'css!/common/tippy/tippy.css',
     'css!/common/jquery-ui/jquery-ui.min.css'
 ], function ($, Messages, Util, Hash, Notifier, AppConfig,
-            Alertify, Tippy, Pages, h, Loading, Test) {
+            Alertify, Tippy, h, Loading, Test) {
     var UI = {};
 
     /*
@@ -27,6 +35,11 @@ define([
 
     // set notification timeout
     Alertify._$$alertify.delay = AppConfig.notificationTimeout || 5000;
+
+    var setHTML = UI.setHTML = function (e, html) {
+        e.innerHTML = html;
+        return e;
+    };
 
     var findCancelButton = UI.findCancelButton = function (root) {
         if (root) {
@@ -144,13 +157,15 @@ define([
     };
 
     dialog.frame = function (content) {
-        return h('div.alertify', {
+        return $(h('div.alertify', {
             tabindex: 1,
         }, [
             h('div.dialog', [
                 h('div', content),
             ])
-        ]);
+        ])).click(function (e) {
+            e.stopPropagation();
+        })[0];
     };
 
     /**
@@ -425,7 +440,8 @@ define([
         cb = cb || function () {};
         opt = opt || {};
 
-        var input = dialog.textInput();
+        var inputBlock = opt.password ? UI.passwordInput() : dialog.textInput();
+        var input = opt.password ? $(inputBlock).find('input')[0] : inputBlock;
         input.value = typeof(def) === 'string'? def: '';
 
         var message;
@@ -441,7 +457,7 @@ define([
         var cancel = dialog.cancelButton(opt.cancel);
         var frame = dialog.frame([
             message,
-            input,
+            inputBlock,
             dialog.nav([ cancel, ok, ]),
         ]);
 
@@ -623,6 +639,7 @@ define([
                     h('p.cp-loading-progress-drive'),
                     h('p.cp-loading-progress-pad')
                 ]);
+                $(progress).hide();
                 $loading.find('.cp-loading-container').append(progress);
             } else if (config.noProgress) {
                 $loading.find('.cp-loading-progress').remove();
@@ -644,6 +661,7 @@ define([
     UI.updateLoadingProgress = function (data, isDrive) {
         var $loading = $('#' + LOADING);
         if (!$loading.length || loading.error) { return; }
+        $loading.find('.cp-loading-progress').show();
         var $progress;
         if (isDrive) {
             // Drive state
@@ -660,7 +678,7 @@ define([
                 // Update the current state
                 loading.driveState = data.state;
                 data.progress = data.progress || 100;
-                data.msg = Messages['loading_drive_'+data.state] || '';
+                data.msg = Messages['loading_drive_'+ Math.floor(data.state)] || '';
                 $progress.html(data.msg);
                 if (data.progress) {
                     $progress.append(h('div.cp-loading-progress-bar', [
@@ -756,7 +774,7 @@ define([
     UI.getFileIcon = function (data) {
         var $icon = UI.getIcon();
         if (!data) { return $icon; }
-        var href = data.href;
+        var href = data.href || data.roHref;
         var type = data.type;
         if (!href && !type) { return $icon; }
 
@@ -821,13 +839,13 @@ define([
             var out = false;
             var xId = $(x).attr('aria-describedby');
             if (xId) {
-                if (xId.indexOf('tippy-tooltip-') === 0) {
+                if (xId.indexOf('tippy-') === 0) {
                     return true;
                 }
             }
             $(x).find('[aria-describedby]').each(function (i, el) {
                 var id = el.getAttribute('aria-describedby');
-                if (id.indexOf('tippy-tooltip-') !== 0) { return; }
+                if (id.indexOf('tippy-') !== 0) { return; }
                 out = true;
             });
             return out;
@@ -861,9 +879,144 @@ define([
         });
     };
 
-    UI.createCheckbox = Pages.createCheckbox;
+    UI.createCheckbox = function (id, labelTxt, checked, opts) {
+        opts = opts|| {};
+        // Input properties
+        var inputOpts = {
+            type: 'checkbox',
+            id: id
+        };
+        if (checked) { inputOpts.checked = 'checked'; }
+        $.extend(inputOpts, opts.input || {});
 
-    UI.createRadio = Pages.createRadio;
+        // Label properties
+        var labelOpts = {};
+        $.extend(labelOpts, opts.label || {});
+        if (labelOpts.class) { labelOpts.class += ' cp-checkmark'; }
+
+        // Mark properties
+        var markOpts = { tabindex: 0 };
+        $.extend(markOpts, opts.mark || {});
+
+        var input = h('input', inputOpts);
+        var mark = h('span.cp-checkmark-mark', markOpts);
+        var label = h('span.cp-checkmark-label', labelTxt);
+
+        $(mark).keydown(function (e) {
+            if (e.which === 32) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(input).prop('checked', !$(input).is(':checked'));
+                $(input).change();
+            }
+        });
+
+        $(input).change(function () { $(mark).focus(); });
+
+        return h('label.cp-checkmark', labelOpts, [
+            input,
+            mark,
+            label
+        ]);
+    };
+
+    UI.createRadio = function (name, id, labelTxt, checked, opts) {
+        opts = opts|| {};
+        // Input properties
+        var inputOpts = {
+            type: 'radio',
+            id: id,
+            name: name
+        };
+        if (checked) { inputOpts.checked = 'checked'; }
+        $.extend(inputOpts, opts.input || {});
+
+        // Label properties
+        var labelOpts = {};
+        $.extend(labelOpts, opts.label || {});
+        if (labelOpts.class) { labelOpts.class += ' cp-checkmark'; }
+
+        // Mark properties
+        var markOpts = { tabindex: 0 };
+        $.extend(markOpts, opts.mark || {});
+
+        var input = h('input', inputOpts);
+        var mark = h('span.cp-radio-mark', markOpts);
+        var label = h('span.cp-checkmark-label', labelTxt);
+
+        $(mark).keydown(function (e) {
+            if (e.which === 32) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(input).prop('checked', !$(input).is(':checked'));
+                $(input).change();
+            }
+        });
+
+        $(input).change(function () { $(mark).focus(); });
+
+        var radio =  h('label', labelOpts, [
+            input,
+            mark,
+            label
+        ]);
+
+        $(radio).addClass('cp-radio');
+
+        return radio;
+    };
+
+    UI.cornerPopup = function (text, actions, footer, opts) {
+        opts = opts || {};
+
+        var minimize = h('div.cp-corner-minimize.fa.fa-window-minimize');
+        var maximize = h('div.cp-corner-maximize.fa.fa-window-maximize');
+        var popup = h('div.cp-corner-container', [
+            minimize,
+            maximize,
+            h('div.cp-corner-filler', { style: "width:110px;" }),
+            h('div.cp-corner-filler', { style: "width:80px;" }),
+            h('div.cp-corner-filler', { style: "width:60px;" }),
+            h('div.cp-corner-filler', { style: "width:40px;" }),
+            h('div.cp-corner-filler', { style: "width:20px;" }),
+            setHTML(h('div.cp-corner-text'), text),
+            h('div.cp-corner-actions', actions),
+            setHTML(h('div.cp-corner-footer'), footer)
+        ]);
+
+        $(minimize).click(function () {
+            $(popup).addClass('cp-minimized');
+        });
+        $(maximize).click(function () {
+            $(popup).removeClass('cp-minimized');
+        });
+
+        if (opts.hidden) {
+            $(popup).addClass('cp-minimized');
+        }
+        if (opts.big) {
+            $(popup).addClass('cp-corner-big');
+        }
+
+        var hide = function () {
+            $(popup).hide();
+        };
+        var show = function () {
+            $(popup).show();
+        };
+        var deletePopup = function () {
+            $(popup).remove();
+        };
+
+        $('body').append(popup);
+
+        return {
+            popup: popup,
+            hide: hide,
+            show: show,
+            delete: deletePopup
+        };
+    };
 
     return UI;
 });

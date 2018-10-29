@@ -4,16 +4,32 @@ define([
     '/common/common-hash.js',
     '/common/common-util.js',
     '/common/media-tag.js',
+    '/common/highlight/highlight.pack.js',
     '/bower_components/diff-dom/diffDOM.js',
     '/bower_components/tweetnacl/nacl-fast.min.js',
-],function ($, Marked, Hash, Util, MediaTag) {
+    'css!/common/highlight/styles/github.css'
+],function ($, Marked, Hash, Util, MediaTag, Highlight) {
     var DiffMd = {};
 
     var DiffDOM = window.diffDOM;
     var renderer = new Marked.Renderer();
 
+    var highlighter = function () {
+        return function(code, lang) {
+            if (lang) {
+                try {
+                    return Highlight.highlight(lang, code).value;
+                } catch (e) {
+                    return code;
+                }
+            }
+            return code;
+        };
+    };
+
     Marked.setOptions({
-        renderer: renderer
+        renderer: renderer,
+        highlight: highlighter(),
     });
 
     DiffMd.render = function (md) {
@@ -25,9 +41,11 @@ define([
     // Tasks list
     var checkedTaskItemPtn = /^\s*(<p>)?\[[xX]\](<\/p>)?\s*/;
     var uncheckedTaskItemPtn = /^\s*(<p>)?\[ ?\](<\/p>)?\s*/;
+    var bogusCheckPtn = /<input( checked=""){0,1} disabled="" type="checkbox">/;
     renderer.listitem = function (text) {
         var isCheckedTaskItem = checkedTaskItemPtn.test(text);
         var isUncheckedTaskItem = uncheckedTaskItemPtn.test(text);
+        var hasBogusInput = bogusCheckPtn.test(text);
         if (isCheckedTaskItem) {
             text = text.replace(checkedTaskItemPtn,
                 '<i class="fa fa-check-square" aria-hidden="true"></i>&nbsp;') + '\n';
@@ -36,16 +54,29 @@ define([
             text = text.replace(uncheckedTaskItemPtn,
                 '<i class="fa fa-square-o" aria-hidden="true"></i>&nbsp;') + '\n';
         }
+        if (!isCheckedTaskItem && !isUncheckedTaskItem && hasBogusInput) {
+            if (/checked/.test(text)) {
+                text = text.replace(bogusCheckPtn, 
+                '<i class="fa fa-check-square" aria-hidden="true"></i>&nbsp;') + '\n';
+            } else if (/disabled/.test(text)) {
+                text = text.replace(bogusCheckPtn, 
+                '<i class="fa fa-square-o" aria-hidden="true"></i>&nbsp;') + '\n';
+            }
+        }
         var cls = (isCheckedTaskItem || isUncheckedTaskItem) ? ' class="todo-list-item"' : '';
         return '<li'+ cls + '>' + text + '</li>\n';
     };
     renderer.image = function (href, title, text) {
         if (href.slice(0,6) === '/file/') {
-            // PASSWORD_FILES
+            // DEPRECATED
+            // Mediatag using markdown syntax should not be used anymore so they don't support
+            // password-protected files
+            console.log('DEPRECATED: mediatag using markdown syntax!');
             var parsed = Hash.parsePadUrl(href);
-            var hexFileName = Util.base64ToHex(parsed.hashData.channel);
-            var src = '/blob/' + hexFileName.slice(0,2) + '/' + hexFileName;
-            var mt = '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + parsed.hashData.key + '">';
+            var secret = Hash.getSecrets('file', parsed.hash);
+            var src = Hash.getBlobPathFromHex(secret.channel);
+            var key = Hash.encodeBase64(secret.keys.cryptKey);
+            var mt = '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + key + '"></media-tag>';
             if (mediaMap[src]) {
                 mt += mediaMap[src];
             }
@@ -162,7 +193,8 @@ define([
         return patch;
     };
 
-    DiffMd.apply = function (newHtml, $content) {
+    DiffMd.apply = function (newHtml, $content, common) {
+        var contextMenu = common.importMediaTagMenu();
         var id = $content.attr('id');
         if (!id) { throw new Error("The element must have a valid id"); }
         var pattern = /(<media-tag src="([^"]*)" data-crypto-key="([^"]*)">)<\/media-tag>/g;
@@ -188,6 +220,11 @@ define([
             DD.apply($content[0], patch);
             var $mts = $content.find('media-tag:not(:has(*))');
             $mts.each(function (i, el) {
+                $(el).contextmenu(function (e) {
+                    e.preventDefault();
+                    $(contextMenu.menu).data('mediatag', $(el));
+                    contextMenu.show(e);
+                });
                 MediaTag(el);
                 var observer = new MutationObserver(function(mutations) {
                     mutations.forEach(function(mutation) {

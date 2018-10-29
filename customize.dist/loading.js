@@ -45,8 +45,7 @@ define([], function () {
     flex-shrink: 0;
     display: flex;
     flex-flow: column;
-    justify-content: center;
-    justify-content: space-evenly;
+    justify-content: space-around;
     align-items: center;
 }
 @media screen and (max-height: 800px) {
@@ -183,7 +182,7 @@ define([], function () {
         '</div>',
         '<div class="cp-loading-container">',
             '<div class="cp-loading-spinner-container">',
-                '<span class="fa fa-circle-o-notch fa-spin fa-4x fa-fw"></span>',
+                '<span class="fa fa-spinner fa-pulse fa-4x fa-fw"></span>',
             '</div>',
             '<p id="cp-loading-message"></p>',
         '</div>'

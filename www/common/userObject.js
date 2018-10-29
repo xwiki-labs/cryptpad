@@ -13,10 +13,10 @@ define([
     var UNSORTED = module.UNSORTED = "unsorted";
     var TRASH = module.TRASH = "trash";
     var TEMPLATE = module.TEMPLATE = "template";
+    var SHARED_FOLDERS = module.SHARED_FOLDERS = "sharedFolders";
 
     module.init = function (files, config) {
         var exp = {};
-        var pinPads = config.pinPads;
         var sframeChan = config.sframeChan;
 
         var FILES_DATA = module.FILES_DATA = exp.FILES_DATA = Constants.storageKey;
@@ -28,23 +28,35 @@ define([
         exp.UNSORTED = UNSORTED;
         exp.TRASH = TRASH;
         exp.TEMPLATE = TEMPLATE;
+        exp.SHARED_FOLDERS = SHARED_FOLDERS;
+
+        var sharedFolder = exp.sharedFolder = config.sharedFolder;
+        exp.id = config.id;
 
         // Logging
         var logging = function () {
             console.log.apply(console, arguments);
         };
-        var log = config.log || logging;
+        var log = exp.log = config.log || logging;
         var logError = config.logError || logging;
         var debug = exp.debug = config.debug || logging;
+
+        exp.fixFiles = function () {}; // Overriden by OuterFO
+
         var error = exp.error = function() {
-            exp.fixFiles();
+            if (sframeChan) {
+                return void sframeChan.query("Q_DRIVE_USEROBJECT", {
+                    cmd: "fixFiles",
+                    data: {}
+                }, function () {});
+            } else if (typeof (exp.fixFiles) === "function") {
+                exp.fixFiles();
+            }
             console.error.apply(console, arguments);
+            exp.fixFiles();
         };
 
-        // TODO: workgroup
-        var workgroup = config.workgroup;
-
-        if (pinPads) {
+        if (config.outer) {
             // Extend "exp" with methods used only outside of the iframe (requires access to store)
             OuterFO.init(config, exp, files);
         }
@@ -69,7 +81,12 @@ define([
 
         var compareFiles = function (fileA, fileB) { return fileA === fileB; };
 
+        var isSharedFolder = exp.isSharedFolder = function (element) {
+            if (sharedFolder) { return false; } // No recursive shared folders
+            return Boolean(files[SHARED_FOLDERS] && files[SHARED_FOLDERS][element]);
+        };
         var isFile = exp.isFile = function (element, allowStr) {
+            if (isSharedFolder(element)) { return false; }
             return typeof(element) === "number" ||
                     ((typeof(files[OLD_FILES_DATA]) !== "undefined" || allowStr)
                         &&  typeof(element) === "string");
@@ -78,15 +95,11 @@ define([
         exp.isReadOnlyFile = function (element) {
             if (!isFile(element)) { return false; }
             var data = exp.getFileData(element);
-            var parsed = Hash.parsePadUrl(data.href);
-            if (!parsed) { return false; }
-            var pHash = parsed.hashData;
-            if (!pHash || pHash.type !== "pad") { return; }
-            return pHash && pHash.mode === 'view';
+            return Boolean(data.roHref && !data.href);
         };
 
         var isFolder = exp.isFolder = function (element) {
-            return typeof(element) === "object";
+            return typeof(element) === "object" || isSharedFolder(element);
         };
         exp.isFolderEmpty = function (element) {
             if (!isFolder(element)) { return false; }
@@ -137,9 +150,11 @@ define([
 
         // Data from filesData
         var getTitle = exp.getTitle = function (file, type) {
-            if (workgroup) { debug("No titles in workgroups"); return; }
+            if (isSharedFolder(file)) {
+                return '??';
+            }
             var data = getFileData(file);
-            if (!file || !data || !data.href) {
+            if (!file || !data || !(data.href || data.roHref)) {
                 error("getTitle called with a non-existing file id: ", file, data);
                 return;
             }
@@ -209,14 +224,16 @@ define([
 
         // GET FILES
 
-        var getFilesRecursively = function (root, arr) {
+        var getFilesRecursively = exp.getFilesRecursively = function (root, arr) {
+            arr = arr || [];
             for (var e in root) {
-                if (isFile(root[e])) {
+                if (isFile(root[e]) || isSharedFolder(root[e])) {
                     if(arr.indexOf(root[e]) === -1) { arr.push(root[e]); }
                 } else {
                     getFilesRecursively(root[e], arr);
                 }
             }
+            return arr;
         };
         var _getFiles = {};
         _getFiles['array'] = function (cat) {
@@ -228,6 +245,7 @@ define([
         });
         _getFiles['hrefArray'] = function () {
             var ret = [];
+            if (sharedFolder) { return ret; }
             getHrefArray().forEach(function (c) {
                 ret = ret.concat(_getFiles[c]());
             });
@@ -242,7 +260,7 @@ define([
             var root = files[TRASH];
             var ret = [];
             var addFiles = function (el) {
-                if (isFile(el.element)) {
+                if (isFile(el.element) || isSharedFolder(el.element)) {
                     if(ret.indexOf(el.element) === -1) { ret.push(el.element); }
                 } else {
                     getFilesRecursively(el.element, ret);
@@ -272,10 +290,15 @@ define([
             if (!files[FILES_DATA]) { return ret; }
             return Object.keys(files[FILES_DATA]).map(Number);
         };
+        _getFiles[SHARED_FOLDERS] = function () {
+            var ret = [];
+            if (!files[SHARED_FOLDERS]) { return ret; }
+            return Object.keys(files[SHARED_FOLDERS]).map(Number);
+        };
         var getFiles = exp.getFiles = function (categories) {
             var ret = [];
             if (!categories || !categories.length) {
-                categories = [ROOT, 'hrefArray', TRASH, OLD_FILES_DATA, FILES_DATA];
+                categories = [ROOT, 'hrefArray', TRASH, OLD_FILES_DATA, FILES_DATA, SHARED_FOLDERS];
             }
             categories.forEach(function (c) {
                 if (typeof _getFiles[c] === "function") {
@@ -288,11 +311,23 @@ define([
         var getIdFromHref = exp.getIdFromHref = function (href) {
             var result;
             getFiles([FILES_DATA]).some(function (id) {
-                if (files[FILES_DATA][id].href === href) {
+                if (files[FILES_DATA][id].href === href ||
+                    files[FILES_DATA][id].roHref === href) {
                     result = id;
                     return true;
                 }
-                return;
+            });
+            return result;
+        };
+
+        exp.getSFIdFromHref = function (href) {
+            var result;
+            getFiles([SHARED_FOLDERS]).some(function (id) {
+                if (files[SHARED_FOLDERS][id].href === href ||
+                    files[SHARED_FOLDERS][id].roHref === href) {
+                    result = id;
+                    return true;
+                }
             });
             return result;
         };
@@ -308,7 +343,7 @@ define([
                 }
             };
 
-            if (isFile(root)) {
+            if (isFile(root) || isSharedFolder(root)) {
                 if (compareFiles(file, root)) {
                     if (paths.indexOf(path) === -1) {
                         paths.push(path);
@@ -328,6 +363,7 @@ define([
             return _findFileInRoot([ROOT], file);
         };
         var _findFileInHrefArray = function (rootName, file) {
+            if (sharedFolder) { return []; }
             if (!files[rootName]) { return []; }
             var unsorted = files[rootName].slice();
             var ret = [];
@@ -338,6 +374,7 @@ define([
             return ret;
         };
         var _findFileInTrash = function (path, file) {
+            if (sharedFolder) { return []; }
             var root = find(path);
             var paths = [];
             var addPaths = function (p) {
@@ -554,29 +591,29 @@ define([
         // DELETE
         // Permanently delete multiple files at once using a list of paths
         // NOTE: We have to be careful when removing elements from arrays (trash root, unsorted or template)
-        exp.delete = function (paths, cb, nocheck, isOwnPadRemoved) {
+        exp.delete = function (paths, cb, nocheck) {
             if (sframeChan) {
                 return void sframeChan.query("Q_DRIVE_USEROBJECT", {
                     cmd: "delete",
                     data: {
                         paths: paths,
                         nocheck: nocheck,
-                        isOwnPadRemoved: isOwnPadRemoved
                     }
                 }, cb);
             }
-            exp.deleteMultiplePermanently(paths, nocheck, isOwnPadRemoved);
-            if (typeof cb === "function") { cb(); }
+            cb = cb || function () {};
+            exp.deleteMultiplePermanently(paths, nocheck, cb);
+            //if (typeof cb === "function") { cb(); }
         };
         exp.emptyTrash = function (cb) {
+            cb = cb || function () {};
             if (sframeChan) {
                 return void sframeChan.query("Q_DRIVE_USEROBJECT", {
                     cmd: "emptyTrash"
                 }, cb);
             }
             files[TRASH] = {};
-            exp.checkDeletedFiles();
-            if(cb) { cb(); }
+            exp.checkDeletedFiles(cb);
         };
 
         // RENAME
@@ -590,7 +627,6 @@ define([
                     }
                 }, cb);
             }
-            console.log(path, newName);
             if (path.length <= 1) {
                 logError('Renaming `root` is forbidden');
                 return;
@@ -599,7 +635,7 @@ define([
             var element = find(path);
 
             // Folders
-            if (isFolder(element)) {
+            if (isFolder(element) && !isSharedFolder(element)) {
                 var parentPath = path.slice();
                 var oldName = parentPath.pop();
                 if (!newName || !newName.trim() || oldName === newName) { return; }
@@ -614,8 +650,13 @@ define([
                 return;
             }
 
-            // Files
-            var data = files[FILES_DATA][element];
+            // Files or Shared folder
+            var data;
+            if (isSharedFolder(element)) {
+                data = files[SHARED_FOLDERS][element];
+            } else {
+                data = files[FILES_DATA][element];
+            }
             if (!data) { return; }
             if (!newName || newName.trim() === "") {
                 delete data.filename;

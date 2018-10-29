@@ -26,19 +26,23 @@ define([
     '/common/TypingTests.js',
     '/customize/messages.js',
     '/pad/links.js',
+    '/pad/export.js',
     '/bower_components/nthen/index.js',
     '/common/media-tag.js',
     '/api/config',
     '/common/common-hash.js',
     '/common/common-util.js',
+    '/common/common-interface.js',
+    '/common/hyperscript.js',
     '/bower_components/chainpad/chainpad.dist.js',
     '/customize/application_config.js',
+    '/common/test.js',
 
     '/bower_components/diff-dom/diffDOM.js',
 
     'css!/bower_components/bootstrap/dist/css/bootstrap.min.css',
     'css!/bower_components/components-font-awesome/css/font-awesome.min.css',
-    'less!/customize/src/less2/main.less',
+    'less!/pad/app-pad.less'
 ], function (
     $,
     Hyperjson,
@@ -48,13 +52,18 @@ define([
     TypingTest,
     Messages,
     Links,
+    Exporter,
     nThen,
     MediaTag,
     ApiConfig,
     Hash,
     Util,
+    UI,
+    h,
     ChainPad,
-    AppConfig)
+    AppConfig,
+    Test
+)
 {
     var DiffDom = window.diffDOM;
 
@@ -166,10 +175,6 @@ define([
         //'VIDEO',
         //'AUDIO'
     ];
-
-    var getHTML = function (inner) {
-        return ('<!DOCTYPE html>\n' + '<html>\n' + inner.innerHTML);
-    };
 
     var CKEDITOR_CHECK_INTERVAL = 100;
     var ckEditorAvailable = function (cb) {
@@ -433,6 +438,24 @@ define([
 
         var documentBody = ifrWindow.document.body;
 
+        var observer = new MutationObserver(function (muts) {
+            muts.forEach(function (mut) {
+                if (mut.type === 'childList') {
+                    var $a;
+                    for (var i = 0; i < mut.addedNodes.length; i++) {
+                        $a = $(mut.addedNodes[i]);
+                        if ($a.is('p') && $a.find('> span:empty').length
+                            && $a.find('> br').length && $a.children().length === 2) {
+                            $a.find('> span').append($a.find('> br'));
+                        }
+                    }
+                }
+            });
+        });
+        observer.observe(documentBody, {
+            childList: true
+        });
+
         var inner = window.inner = documentBody;
 
         var cursor = module.cursor = Cursor(inner);
@@ -491,6 +514,10 @@ define([
             userDocStateDom.normalize();
             inner.normalize();
 
+            $(userDocStateDom).find('span[data-cke-display-name="media-tag"]:empty').each(function (i, el) {
+                $(el).remove();
+            });
+
             var patch = (DD).diff(inner, userDocStateDom);
             (DD).apply(inner, patch);
 
@@ -524,6 +551,10 @@ define([
             return str;
         });
         framework.setContentGetter(function () {
+            $(inner).find('span[data-cke-display-name="media-tag"]:empty').each(function (i, el) {
+                $(el).remove();
+            });
+
             displayMediaTags(framework, inner, mediaTagMap);
             inner.normalize();
             return FlatDom.fromDOM(inner, shouldSerialize, hjsonFilters);
@@ -560,14 +591,18 @@ define([
                 ckeditor: editor,
                 body: $('body'),
                 onUploaded: function (ev, data) {
-                    // PASSWORD_FILES
                     var parsed = Hash.parsePadUrl(data.url);
-                    var hexFileName = Util.base64ToHex(parsed.hashData.channel);
-                    var src = '/blob/' + hexFileName.slice(0,2) + '/' + hexFileName;
-                    var mt = '<media-tag contenteditable="false" src="' + src + '" data-crypto-key="cryptpad:' + parsed.hashData.key + '" tabindex="1"></media-tag>';
+                    var secret = Hash.getSecrets('file', parsed.hash, data.password);
+                    var src = Hash.getBlobPathFromHex(secret.channel);
+                    var key = Hash.encodeBase64(secret.keys.cryptKey);
+                    var mt = '<media-tag contenteditable="false" src="' + src + '" data-crypto-key="cryptpad:' + key + '"></media-tag>';
                     // MEDIATAG
                     var element = window.CKEDITOR.dom.element.createFromHtml(mt);
-                    editor.insertElement(element);
+                    if (ev && ev.insertElement) {
+                        ev.insertElement(element);
+                    } else {
+                        editor.insertElement(element);
+                    }
                     editor.widgets.initOn( element, 'mediatag' );
                 }
             };
@@ -577,6 +612,38 @@ define([
                 if (data) {
                     var $iframe = $('html').find('iframe').contents();
                     $iframe.find('html').addClass('cke_body_width');
+                }
+            });
+
+            framework._.sfCommon.isPadStored(function (err, val) {
+                if (!val) { return; }
+                var b64images = $(inner).find('img[src^="data:image"]:not(.cke_reset)');
+                if (b64images.length && framework._.sfCommon.isLoggedIn()) {
+                    var no = h('button.cp-corner-cancel', Messages.cancel);
+                    var yes = h('button.cp-corner-primary', Messages.ok);
+                    var actions = h('div', [yes, no]);
+                    var modal = UI.cornerPopup(Messages.pad_base64, actions, '', {big: true});
+                    $(no).click(function () {
+                        modal.delete();
+                    });
+                    $(yes).click(function () {
+                        modal.delete();
+                        b64images.each(function (i, el) {
+                            var src = $(el).attr('src');
+                            var blob = Util.dataURIToBlob(src);
+                            var ext = '.' + (blob.type.split('/')[1] || 'png');
+                            var name = (framework._.title.getTitle() || 'Pad')+'_image';
+                            blob.name = name + ext;
+                            var ev = {
+                                insertElement: function (newEl) {
+                                    var element = new window.CKEDITOR.dom.element(el);
+                                    newEl.replace(element);
+                                    setTimeout(framework.localChange);
+                                }
+                            };
+                            window.APP.FM.handleFile(blob, ev);
+                        });
+                    });
                 }
             });
             /*setTimeout(function () {
@@ -605,26 +672,8 @@ define([
             });
         }, true);
 
-        var exportMediaTags = function (inner, cb) {
-            var $clone = $(inner).clone();
-            nThen(function (waitFor) {
-                $(inner).find('media-tag').each(function (i, el) {
-                    if (!$(el).data('blob')) { return; }
-                    Util.blobToImage($(el).data('blob'), waitFor(function (imgSrc) {
-                        $clone.find('media-tag[src="' + $(el).attr('src') + '"] img')
-                            .attr('src', imgSrc);
-                        $clone.find('media-tag').parent()
-                            .find('.cke_widget_drag_handler_container').remove();
-                    }));
-                });
-            }).nThen(function () {
-                cb($clone[0]);
-            });
-        };
-        framework.setFileExporter('html', function (cb) {
-            exportMediaTags(inner, function (toExport) {
-                cb(new Blob([ getHTML(toExport) ], { type: "text/html;charset=utf-8" }));
-            });
+        framework.setFileExporter(Exporter.type, function (cb) {
+            Exporter.main(inner, cb);
         }, true);
 
         framework.setNormalizer(function (hjson) {
@@ -723,23 +772,32 @@ define([
                 // Used in ckeditor-config.js
                 Ckeditor.CRYPTPAD_URLARGS = ApiConfig.requireConf.urlArgs;
                 var backColor = AppConfig.appBackgroundColor;
-                var newCss = '.cke_body_width { background: '+ backColor +'; height: 100%; }' +
+                var newCss = '.cke_body_width { background: '+ backColor +'; height: 100%; overflow: auto;}' +
                     '.cke_body_width body {' +
                         'max-width: 50em; padding: 20px 30px; margin: 0 auto; min-height: 100%;'+
                         'box-sizing: border-box; overflow: auto;'+
                     '}' +
                     '.cke_body_width body > *:first-child { margin-top: 0; }';
                 Ckeditor.addCss(newCss);
+                Ckeditor._mediatagTranslations = {
+                    title: Messages.pad_mediatagTitle,
+                    width: Messages.pad_mediatagWidth,
+                    height: Messages.pad_mediatagHeight,
+                    ratio: Messages.pad_mediatagRatio,
+                    border: Messages.pad_mediatagBorder,
+                    preview: Messages.pad_mediatagPreview,
+                    'import': Messages.pad_mediatagImport,
+                    options: Messages.pad_mediatagOptions
+                };
                 Ckeditor.plugins.addExternal('mediatag','/pad/', 'mediatag-plugin.js');
+                Ckeditor.plugins.addExternal('blockbase64','/pad/', 'disable-base64.js');
                 module.ckeditor = editor = Ckeditor.replace('editor1', {
                     customConfig: '/customize/ckeditor-config.js',
                 });
                 editor.on('instanceReady', waitFor());
             }).nThen(function () {
-                editor.plugins.mediatag.translations = {
-                    title: Messages.pad_mediatagTitle,
-                    width: Messages.pad_mediatagWidth,
-                    height: Messages.pad_mediatagHeight
+                editor.plugins.mediatag.import = function ($mt) {
+                    framework._.sfCommon.importMediaTag($mt);
                 };
                 Links.addSupportForOpeningLinksInNewTab(Ckeditor)({editor: editor});
             }).nThen(function () {
@@ -754,6 +812,79 @@ define([
             }).nThen(waitFor());
 
         }).nThen(function (/*waitFor*/) {
+            function launchAnchorTest(test) {
+                // -------- anchor test: make sure the exported anchor contains <a name="...">  -------
+                console.log('---- anchor test: make sure the exported anchor contains <a name="...">  -----.');
+
+                function tryAndTestExport() {
+                    console.log("Starting tryAndTestExport.");
+                    editor.on( 'dialogShow', function( evt ) {
+                        console.log("Anchor dialog detected.");
+                        var dialog = evt.data;
+                        $(dialog.parts.contents.$).find("input").val('xx-' + Math.round(Math.random()*1000));
+                        dialog.click(window.CKEDITOR.dialog.okButton(editor).id);
+                    } );
+                    var existingText = editor.getData();
+                    editor.insertText("A bit of text");
+                    console.log("Launching anchor command.");
+                    editor.execCommand(editor.ui.get('Anchor').command);
+                    console.log("Anchor command launched.");
+
+                    var waitH = window.setInterval(function() {
+                        console.log("Waited 2s for the dialog to appear");
+                        var anchors = window.CKEDITOR.plugins["link"].getEditorAnchors(editor);
+                        if(!anchors || anchors.length===0) {
+                            test.fail("No anchors found. Please adjust document");
+                        } else {
+                            console.log(anchors.length + " anchors found.");
+                            var exported = Exporter.getHTML(window.inner);
+                            console.log("Obtained exported: " + exported);
+                            var allFound = true;
+                            for(var i=0; i<anchors.length; i++) {
+                                var anchor = anchors[i];
+                                console.log("Anchor " + anchor.name);
+                                var expected = "<a id=\"" + anchor.id + "\" name=\"" + anchor.name + "\" ";
+                                var found = exported.indexOf(expected)>=0;
+                                console.log("Found " + expected + " " + found + ".");
+                                allFound = allFound && found;
+                            }
+
+                            console.log("Cleaning up.");
+                            if(allFound) {
+                                // clean-up
+                                editor.execCommand('undo');
+                                editor.execCommand('undo');
+                                var nint = window.setInterval(function(){
+                                    console.log("Waiting for undo to yield same result.");
+                                    if(existingText === editor.getData()) {
+                                        window.clearInterval(nint);
+                                        test.pass();
+                                    }
+                                }, 500);
+                                }  else
+                            {
+                                test.fail("Not all expected a elements found for document at " + window.top.location + ".");
+                            }
+                        }
+                        window.clearInterval(waitH);
+                    },2000);
+
+
+                }
+                var intervalHandle = window.setInterval(function() {
+                    if(editor.status==="ready") {
+                        window.clearInterval(intervalHandle);
+                        console.log("Editor is ready.");
+                        tryAndTestExport();
+                    } else {
+                        console.log("Waiting for editor to be ready.");
+                    }
+                }, 100);
+            }
+            Test(function(test) {
+
+                launchAnchorTest(test);
+            });
             andThen2(editor, Ckeditor, framework);
         });
     };

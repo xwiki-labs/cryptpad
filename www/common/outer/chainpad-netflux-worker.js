@@ -22,6 +22,10 @@ define([], function () {
 
     var unBencode = function (str) { return str.replace(/^\d+:/, ''); };
 
+    var removeCp = function (str) {
+        return str.replace(/^cp\|([A-Za-z0-9+\/=]{0,20}\|)?/, '');
+    };
+
     var start = function (conf) {
         var channel = conf.channel;
         var validateKey = conf.validateKey;
@@ -41,6 +45,7 @@ define([], function () {
         conf = undefined;
 
         var initializing = true;
+        var stopped = false;
         var lastKnownHash;
 
         var messageFromOuter = function () {};
@@ -68,7 +73,11 @@ define([], function () {
 
         // shim between chainpad and netflux
         var msgIn = function (peerId, msg) {
-            return msg.replace(/^cp\|([A-Za-z0-9+\/=]+\|)?/, '');
+            // NOTE: Hash version 0 contains a 32 characters nonce followed by a pipe
+            // at the beginning of each message on the server.
+            // We have to make sure our regex ignores this nonce using {0,20} (our IDs
+            // should only be 8 characters long)
+            return removeCp(msg);
         };
 
         var msgOut = function (msg) {
@@ -120,6 +129,8 @@ define([], function () {
 
 
             lastKnownHash = msg.slice(0,64);
+
+            var isCp = /^cp\|/.test(msg);
             var message = msgIn(peer, msg);
 
             verbose(message);
@@ -130,7 +141,7 @@ define([], function () {
             message = unBencode(message);//.slice(message.indexOf(':[') + 1);
 
             // pass the message into Chainpad
-            onMessage(peer, message, validateKey);
+            onMessage(peer, message, validateKey, isCp);
             //sframeChan.query('Q_RT_MESSAGE', message, function () { });
         };
 
@@ -229,11 +240,16 @@ define([], function () {
                 onOpen(wc, network, firstConnection);
             }, function(err) {
                 console.error(err);
+                if (onError) {
+                    onError({
+                        type: err && (err.type || err),
+                        loaded: !initializing
+                    });
+                }
             });
         };
 
         network.on('disconnect', function (reason) {
-            console.log('disconnect');
             //if (isIntentionallyLeaving) { return; }
             if (reason === "network.disconnect() called") { return; }
             onDisconnect();
@@ -241,11 +257,13 @@ define([], function () {
         });
 
         network.on('reconnect', function () {
+            if (stopped) { return; }
             initializing = true;
             connectTo(network, false);
         });
 
         network.on('message', function (msg, sender) { // Direct message
+            if (stopped) { return; }
             var wchan = findChannelById(network.webChannels, channel);
             if (wchan) {
                 onMsg(sender, msg, wchan, network, true);
@@ -253,10 +271,19 @@ define([], function () {
         });
 
         connectTo(network, true);
+
+        return {
+            stop: function () {
+                var wchan = findChannelById(network.webChannels, channel);
+                if (wchan) { wchan.leave(''); }
+                stopped = true;
+            }
+        };
     };
 
     return {
-        start: start
+        start: start,
+        removeCp: removeCp
         /*function (config) {
             config.sframeChan.whenReg('EV_RT_READY', function () {
                 start(config);

@@ -1,6 +1,9 @@
-@import (once) "./tools.less";
+@import (reference) "./tools.less";
 
 .tokenfield_main () {
+    --LessLoader_require: LessLoader_currentFile();
+}
+& {
     .ui-autocomplete {
         z-index: 100001; // alertify + 1
     }
@@ -8,7 +11,7 @@
         .tools_unselectable();
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-evenly;
+        justify-content: space-around;
         height: auto;
         min-height: 34px;
         padding-bottom: 0px;

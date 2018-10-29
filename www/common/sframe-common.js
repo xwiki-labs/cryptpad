@@ -94,6 +94,7 @@ define([
     funcs.getPadCreationScreen = callWithCommon(UIElements.getPadCreationScreen);
     funcs.createNewPadModal = callWithCommon(UIElements.createNewPadModal);
     funcs.onServerError = callWithCommon(UIElements.onServerError);
+    funcs.importMediaTagMenu = callWithCommon(UIElements.importMediaTagMenu);
 
     // Thumb
     funcs.displayThumbnail = callWithCommon(Thumb.displayThumbnail);
@@ -112,21 +113,42 @@ define([
         var origin = ctx.metadataMgr.getPrivateData().origin;
         return '<script src="' + origin + '/common/media-tag-nacl.min.js"></script>';
     };
-    funcs.getMediatagFromHref = function (href) {
-        // PASSWORD_FILES
-        var parsed = Hash.parsePadUrl(href);
-        var secret = Hash.getSecrets('file', parsed.hash);
+    funcs.getMediatagFromHref = function (obj) {
         var data = ctx.metadataMgr.getPrivateData();
+        var secret;
+        if (obj) {
+            secret = Hash.getSecrets('file', obj.hash, obj.password);
+        } else {
+            secret = Hash.getSecrets('file', data.availableHashes.fileHash, data.password);
+        }
         if (secret.keys && secret.channel) {
-            var cryptKey = secret.keys && secret.keys.fileKeyStr;
-            var hexFileName = Util.base64ToHex(secret.channel);
+            var key = Hash.encodeBase64(secret.keys && secret.keys.cryptKey);
+            var hexFileName = secret.channel;
             var origin = data.fileHost || data.origin;
             var src = origin + Hash.getBlobPathFromHex(hexFileName);
-            return '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + cryptKey + '">' +
+            return '<media-tag src="' + src + '" data-crypto-key="cryptpad:' + key + '">' +
                    '</media-tag>';
         }
         return;
     };
+    funcs.importMediaTag = function ($mt) {
+        if (!$mt || !$mt.is('media-tag')) { return; }
+        var chanStr = $mt.attr('src');
+        var keyStr = $mt.attr('data-crypto-key');
+        var channel = chanStr.replace(/\/blob\/[0-9a-f]{2}\//i, '');
+        var key = keyStr.replace(/cryptpad:/i, '');
+        var metadata = $mt[0]._mediaObject._blob.metadata;
+        ctx.sframeChan.query('Q_IMPORT_MEDIATAG', {
+            channel: channel,
+            key: key,
+            name: metadata.name,
+            type: metadata.type,
+            owners: metadata.owners
+        }, function () {
+            UI.log(Messages.saved);
+        });
+    };
+
     funcs.getFileSize = function (channelId, cb) {
         funcs.sendAnonRpcMsg("GET_FILE_SIZE", channelId, function (data) {
             if (!data) { return void cb("No response"); }
@@ -139,6 +161,24 @@ define([
         });
     };
 
+    // Chat
+    var padChatChannel;
+    funcs.getPadChat = function () {
+        return padChatChannel;
+    };
+    funcs.openPadChat = function (saveChanges) {
+        var md = JSON.parse(JSON.stringify(ctx.metadataMgr.getMetadata()));
+        var channel = md.chat || Hash.createChannelId();
+        if (!md.chat) {
+            md.chat = channel;
+            ctx.metadataMgr.updateMetadata(md);
+            setTimeout(saveChanges);
+        }
+        padChatChannel = channel;
+        ctx.sframeChan.query('Q_CHAT_OPENPADCHAT', channel, function (err, obj) {
+            if (err || (obj && obj.error)) { console.error(err || (obj && obj.error)); }
+        });
+    };
 
     // CodeMirror
     funcs.initCodeMirrorApp = callWithCommon(CodeMirror.create);
@@ -149,8 +189,8 @@ define([
         ctx.sframeChan.query('Q_LOGOUT', null, cb);
     };
 
-    funcs.notify = function () {
-        ctx.sframeChan.event('EV_NOTIFY');
+    funcs.notify = function (data) {
+        ctx.sframeChan.event('EV_NOTIFY', data);
     };
     funcs.setTabTitle = function (newTitle) {
         ctx.sframeChan.event('EV_SET_TAB_TITLE', newTitle);
@@ -201,6 +241,12 @@ define([
             template: cfg.template,
             templateId: cfg.templateId
         }, cb);
+    };
+
+    funcs.isPadStored = function (cb) {
+        ctx.sframeChan.query("Q_IS_PAD_STORED", null, function (err, obj) {
+            cb (err || (obj && obj.error), obj);
+        });
     };
 
     funcs.sendAnonRpcMsg = function (msg, content, cb) {
@@ -437,7 +483,20 @@ define([
             });
 
             ctx.sframeChan.on('EV_LOADING_INFO', function (data) {
-                UI.updateLoadingProgress(data, true);
+                UI.updateLoadingProgress(data, 'drive');
+            });
+
+            ctx.sframeChan.on('EV_NEW_VERSION', function () {
+                var $err = $('<div>').append(Messages.newVersionError);
+                $err.find('a').click(function () {
+                    funcs.gotoURL();
+                });
+                UI.findOKButton().click();
+                UI.errorLoadingScreen($err, true, true);
+            });
+
+            ctx.sframeChan.on('EV_AUTOSTORE_DISPLAY_POPUP', function (data) {
+                UIElements.displayStorePadPopup(funcs, data);
             });
 
             ctx.metadataMgr.onReady(waitFor());
@@ -470,6 +529,15 @@ define([
                 logoutHandlers.forEach(function (h) {
                     if (typeof (h) === "function") { h(); }
                 });
+            });
+
+            ctx.sframeChan.on('EV_CHROME_68', function () {
+                UI.alert(Messages.chrome68);
+            });
+
+            funcs.isPadStored(function (err, val) {
+                if (err || !val) { return; }
+                UIElements.displayCrowdfunding(funcs);
             });
 
             ctx.sframeChan.ready();

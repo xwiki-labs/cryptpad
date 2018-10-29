@@ -74,6 +74,12 @@ define({
     // Get the user's pin limit, usage and plan
     'Q_PIN_GET_USAGE': true,
 
+    // Write/update the login block when the account password is changed
+    'Q_WRITE_LOGIN_BLOCK': true,
+
+    // Remove login blocks
+    'Q_REMOVE_LOGIN_BLOCK': true,
+
     // Check the pin limit to determine if we can store the pad in the drive or if we should.
     // display a warning
     'Q_GET_PIN_LIMIT_STATUS': true,
@@ -84,6 +90,7 @@ define({
     // Request the full history from the server when the users clicks on the history button.
     // Callback is called when the FULL_HISTORY_END message is received in the outside.
     'Q_GET_FULL_HISTORY': true,
+    'Q_GET_HISTORY_RANGE': true,
     // When a (full) history message is received from the server.
     'EV_RT_HIST_MESSAGE': true,
 
@@ -106,6 +113,10 @@ define({
     'Q_SET_ATTRIBUTE': true,
     'Q_GET_PAD_ATTRIBUTE': true,
     'Q_SET_PAD_ATTRIBUTE': true,
+
+    // Check if a pad is only in a shared folder or (also) in the main drive.
+    // This allows us to change the behavior of some buttons (trash icon...)
+    'Q_IS_ONLY_IN_SHARED_FOLDER': true,
 
     // Open/close the File picker (sent from the iframe to the outside)
     'EV_FILE_PICKER_OPEN': true,
@@ -160,6 +171,11 @@ define({
     'Q_CONTACTS_SET_CHANNEL_HEAD': true,
     'Q_CONTACTS_CLEAR_OWNED_CHANNEL': true,
 
+    // Chat
+    'EV_CHAT_EVENT': true,
+    'Q_CHAT_COMMAND': true,
+    'Q_CHAT_OPENPADCHAT': true,
+
     // Put one or more entries to the localStore which will go in localStorage.
     'EV_LOCALSTORE_PUT': true,
     // Put one entry in the parent sessionStorage
@@ -196,10 +212,10 @@ define({
 
     // Anonymous users can empty their drive and remove FS_hash from localStorage
     'EV_BURN_ANON_DRIVE': true,
-
     // Inner drive needs to send command and receive updates from the async store
     'Q_DRIVE_USEROBJECT': true,
     'Q_DRIVE_GETOBJECT': true,
+    'Q_DRIVE_RESTORE': true,
     // Get the pads deleted from the server by other users to remove them from the drive
     'Q_DRIVE_GETDELETED': true,
     // Store's userObject need to send log messages to inner to display them in the UI
@@ -207,6 +223,8 @@ define({
     // Refresh the drive when the drive has changed ('change' or 'remove' events)
     'EV_DRIVE_CHANGE': true,
     'EV_DRIVE_REMOVE': true,
+    // Set shared folder hash in the address bar
+    'EV_DRIVE_SET_HASH': true,
 
     // Remove an owned pad from the server
     'Q_REMOVE_OWNED_CHANNEL': true,
@@ -214,6 +232,8 @@ define({
     // Notifications about connection and disconnection from the network
     'EV_NETWORK_DISCONNECT': true,
     'EV_NETWORK_RECONNECT': true,
+    // Reload on new version
+    'EV_NEW_VERSION': true,
 
     // Pad creation screen: create a pad with the selected attributes (owned, expire)
     'Q_CREATE_PAD': true,
@@ -224,16 +244,36 @@ define({
     // The exact protocol is defined in common/test.js
     'EV_TESTDATA': true,
 
-    // Critical error outside the iframe during loading screen
-    'EV_LOADING_ERROR': true,
-
     // Ask for the pad password when a pad is protected
     'EV_PAD_PASSWORD': true,
     'Q_PAD_PASSWORD_VALUE': true,
+    // Change pad password
+    'Q_PAD_PASSWORD_CHANGE': true,
+
+    // Migrate drive to owned drive
+    'Q_CHANGE_USER_PASSWORD': true,
 
     // Loading events to display in the loading screen
     'EV_LOADING_INFO': true,
+    // Critical error outside the iframe during loading screen
+    'EV_LOADING_ERROR': true,
+
+    // Chrome 68 bug...
+    'EV_CHROME_68': true,
 
     // Get all existing tags
     'Q_GET_ALL_TAGS': true,
+
+    // Store pads in the drive
+    'EV_AUTOSTORE_DISPLAY_POPUP': true,
+    'Q_AUTOSTORE_STORE': true,
+    'Q_IS_PAD_STORED': true,
+
+    // Import mediatag from a pad
+    'Q_IMPORT_MEDIATAG': true,
+
+    // Ability to get a pad's content from its hash
+    'Q_CRYPTGET': true,
+    'EV_CRYPTGET_DISCONNECT': true,
+
 });

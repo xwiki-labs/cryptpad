@@ -1,12 +1,3 @@
-/**
- * @license Copyright (c) 2003-2017, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.md or http://ckeditor.com/license
- */
-
-/**
- * @fileOverview The Image plugin.
- */
-
 ( function() {
 
     CKEDITOR.plugins.add( 'mediatag', {
@@ -18,6 +9,9 @@
             CKEDITOR.addCss(
             'media-tag{' +
                 'display:inline-block;' +
+                'border-style: solid;' +
+                'border-color: black;' +
+                'border-width: 0;' +
             '}' +
             'media-tag.selected{' +
                 'border: 1px solid black;' +
@@ -34,6 +28,8 @@
         },
         init: function( editor ) {
             var pluginName = 'mediatag';
+            var Messages = CKEDITOR._mediatagTranslations;
+            var targetWidget;
 
             // Register the dialog.
             CKEDITOR.dialog.add( pluginName, this.path + 'mediatag-plugin-dialog.js' );
@@ -48,7 +44,57 @@
                 }
 
             });
+
+            editor.addCommand('importMediatag', {
+                exec: function (editor) {
+                    var w = targetWidget;
+                    targetWidget = undefined;
+                    var $mt = $(w.$).find('media-tag');
+                    editor.plugins.mediatag.import($mt);
+                }
+            });
+
+            if (editor.addMenuItems) {
+                editor.addMenuGroup('mediatag');
+                editor.addMenuItem('importMediatag', {
+                        label: Messages.import,
+                        icon: 'save',
+                        command: 'importMediatag',
+                        group: 'mediatag'
+                });
+                editor.addMenuItem('mediatag', {
+                        label: Messages.options,
+                        icon: 'image',
+                        command: 'mediatag',
+                        group: 'mediatag'
+                });
+            }
+            if (editor.contextMenu) {
+                editor.contextMenu.addListener(function (element) {
+                    if (element.is('.cke_widget_mediatag')
+                        || element.getAttribute('data-cke-display-name') === 'media-tag') {
+                        targetWidget = element;
+                        return {
+                            mediatag: CKEDITOR.TRISTATE_OFF,
+                            importMediatag: CKEDITOR.TRISTATE_OFF,
+                        };
+                    }
+                });
+            }
+
         },
     } );
+
+
+    CKEDITOR.on('dialogDefinition', function (ev) {
+        var dialog = ev.data.definition;
+        if (ev.data.name === 'image') {
+            dialog.removeContents('Link');
+            dialog.removeContents('advanced');
+            //var info = dialog.getContents('info');
+            //info.remove('cmbAlign');
+        }
+    });
+
 } )();
 
