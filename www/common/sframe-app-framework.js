@@ -218,6 +218,7 @@ define([
                         var ops = ChainPad.Diff.diff(newContentStrNoMeta, newContent2StrNoMeta);
                         // log the changes
                         console.log(newContentStrNoMeta);
+                        console.log(newContent2StrNoMeta);
                         console.log(ops);
                         var sop = JSON.stringify([ newContentStrNoMeta, ops ]);
 
