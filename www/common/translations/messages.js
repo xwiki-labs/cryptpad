@@ -569,7 +569,8 @@ define(function () {
     out.settings_backup2Confirm = "This will download all the pads and files from your CryptDrive. If you want to continue, pick a name and press OK";
     out.settings_exportTitle = "Export your CryptDrive";
     out.settings_exportDescription = "Please wait while we're downloading and decrypting your documents. This may take a few minutes. Closing the tab will interrupt the process.";
-    out.settings_exportWarning = "For better performance, it is recommended to leave this tab focused.";
+    out.settings_exportFailed = "If a pad requires more than 1 minute to be downloaded, it won't be included in the export. A link to any pad that has not been exported will be displayed.";
+    out.settings_exportWarning = "Note: this tool is still in a beta version and it might have scalability issues. For better performance, it is recommended to leave this tab focused.";
     out.settings_exportCancel = "Are you sure you want to cancel the export? You will have to start again from the beginning next time.";
     out.settings_export_reading = "Reading your CryptDrive...";
     out.settings_export_download = "Downloading and decrypting your documents...";
@@ -675,6 +676,7 @@ define(function () {
     out.settings_changePasswordNewPasswordSameAsOld = "Your new password must be different than your current password.";
 
     out.upload_title = "File upload";
+    out.upload_type = "Type";
     out.upload_modal_title = "File upload options";
     out.upload_modal_filename = "File name (extension <em>{0}</em> added automatically)";
     out.upload_modal_owner = "Owned file";
@@ -692,9 +694,13 @@ define(function () {
     out.upload_size = "Size";
     out.upload_progress = "Progress";
     out.upload_mustLogin = "You must be logged in to upload files";
+    out.upload_up = "Upload";
     out.download_button = "Decrypt & Download";
     out.download_mt_button = "Download";
     out.download_resourceNotAvailable = "The requested resource was not available... Press Esc to continue.";
+    out.download_dl = "Download";
+    out.download_step1 = "Downloading";
+    out.download_step2 = "Decrypting";
 
     out.todo_title = "CryptTodo";
     out.todo_newTodoNamePlaceholder = "Describe your task...";

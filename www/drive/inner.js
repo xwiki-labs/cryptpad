@@ -71,9 +71,10 @@ define([
     var SHARED_FOLDER_NAME = Messages.fm_sharedFolderName;
 
     // Icons
-    var faFolder = 'fa-folder';
-    var faFolderOpen = 'fa-folder-open';
-    var faSharedFolder = 'fa-folder-o';
+    var faFolder = 'cptools-folder';
+    var faFolderOpen = 'cptools-folder-open';
+    var faSharedFolder = 'cptools-shared-folder';
+    var faSharedFolderOpen = 'cptools-shared-folder-open';
     var faShared = 'fa-shhare-alt';
     var faReadOnly = 'fa-eye';
     var faRename = 'fa-pencil';
@@ -84,19 +85,20 @@ define([
     var faEmpty = 'fa-trash-o';
     var faRestore = 'fa-repeat';
     var faShowParent = 'fa-location-arrow';
+    var faDownload = 'cptools-file';
     var $folderIcon = $('<span>', {
-        "class": faFolder + " fa cp-app-drive-icon-folder cp-app-drive-content-icon"
+        "class": faFolder + " cptools cp-app-drive-icon-folder cp-app-drive-content-icon"
     });
     //var $folderIcon = $('<img>', {src: "/customize/images/icons/folder.svg", "class": "folder icon"});
     var $folderEmptyIcon = $folderIcon.clone();
-    var $folderOpenedIcon = $('<span>', {"class": faFolderOpen + " fa cp-app-drive-icon-folder"});
+    var $folderOpenedIcon = $('<span>', {"class": faFolderOpen + " cptools cp-app-drive-icon-folder"});
     //var $folderOpenedIcon = $('<img>', {src: "/customize/images/icons/folderOpen.svg", "class": "folder icon"});
     var $folderOpenedEmptyIcon = $folderOpenedIcon.clone();
-    var $sharedFolderIcon = $('<span>', {"class": faSharedFolder + " fa cp-app-drive-icon-folder"});
-    //var $sharedFolderOpenedIcon = $sharedFolderIcon.clone();
+    var $sharedFolderIcon = $('<span>', {"class": faSharedFolder + " cptools cp-app-drive-icon-folder"});
+    var $sharedFolderOpenedIcon = $('<span>', {"class": faSharedFolderOpen + " cptools cp-app-drive-icon-folder"});
     //var $upIcon = $('<span>', {"class": "fa fa-arrow-circle-up"});
     var $unsortedIcon = $('<span>', {"class": "fa fa-files-o"});
-    var $templateIcon = $('<span>', {"class": "fa fa-cubes"});
+    var $templateIcon = $('<span>', {"class": "cptools cptools-template"});
     var $recentIcon = $('<span>', {"class": "fa fa-clock-o"});
     var $trashIcon = $('<span>', {"class": "fa " + faTrash});
     var $trashEmptyIcon = $('<span>', {"class": "fa fa-trash-o"});
@@ -264,6 +266,10 @@ define([
                     'tabindex': '-1',
                     'data-icon': faReadOnly,
                 }, Messages.fc_open_ro)),
+                h('li', h('a.cp-app-drive-context-download.dropdown-item', {
+                    'tabindex': '-1',
+                    'data-icon': faDownload,
+                }, Messages.download_mt_button)),
                 h('li', h('a.cp-app-drive-context-share.dropdown-item', {
                     'tabindex': '-1',
                     'data-icon': 'fa-shhare-alt',
@@ -845,6 +851,9 @@ define([
                         // We can only open parent in virtual categories
                         hide.push('openparent');
                     }
+                    if (!$element.is('.cp-border-color-file')) {
+                        hide.push('download');
+                    }
                     if ($element.is('.cp-app-drive-element-file')) {
                         // No folder in files
                         hide.push('newfolder');
@@ -902,6 +911,7 @@ define([
                     hide.push('rename');
                     hide.push('openparent');
                     hide.push('hashtag');
+                    hide.push('download');
                 }
                 if (containsFolder && paths.length > 1) {
                     // Cannot open multiple folders
@@ -918,7 +928,7 @@ define([
                     show = ['newfolder', 'newsharedfolder', 'newdoc'];
                     break;
                 case 'tree':
-                    show = ['open', 'openro', 'share', 'rename', 'delete', 'deleteowned', 'removesf',
+                    show = ['open', 'openro', 'download', 'share', 'rename', 'delete', 'deleteowned', 'removesf',
                             'newfolder', 'properties', 'hashtag'];
                     break;
                 case 'default':
@@ -1017,7 +1027,8 @@ define([
             $actions.each(function (i, el) {
                 var $a = $('<button>', {'class': 'cp-app-drive-element'});
                 if ($(el).attr('data-icon')) {
-                    $a.addClass('fa').addClass($(el).attr('data-icon'));
+                    var font = $(el).attr('data-icon').indexOf('cptools') === 0 ? 'cptools' : 'fa';
+                    $a.addClass(font).addClass($(el).attr('data-icon'));
                     $a.attr('title', $(el).text());
                 } else {
                     $a.text($(el).text());
@@ -1889,7 +1900,7 @@ define([
                 options.push({
                     tag: 'a',
                     attributes: {'class': 'cp-app-drive-new-upload'},
-                    content: $('<div>').append(getIcon('file')).html() + Messages.uploadButton
+                    content: $('<div>').append(getIcon('fileupload')).html() + Messages.uploadButton
                 });
                 options.push({tag: 'hr'});
             }
@@ -2169,7 +2180,7 @@ define([
                 var $element2 = $('<li>', {
                     'class': 'cp-app-drive-new-upload cp-app-drive-element-row ' +
                              'cp-app-drive-element-grid'
-                }).prepend(getIcon('file')).appendTo($container);
+                }).prepend(getIcon('fileupload')).appendTo($container);
                 $element2.append($('<span>', {'class': 'cp-app-drive-new-name'})
                     .text(Messages.uploadButton));
             }
@@ -2868,7 +2879,7 @@ define([
                     // Fix name
                     key = manager.getSharedFolderData(fId).title;
                     // Fix icon
-                    $icon = $sharedFolderIcon;
+                    $icon = isCurrentFolder ? $sharedFolderOpenedIcon : $sharedFolderIcon;
                 } else {
                     var isEmpty = manager.isFolderEmpty(root[key]);
                     subfolder = manager.hasSubfolder(root[key]);
@@ -2892,7 +2903,7 @@ define([
             var $icon = manager.isFolderEmpty(files[TRASH]) ? $trashEmptyIcon.clone() : $trashIcon.clone();
             var isOpened = manager.comparePath(path, currentPath);
             var $trashElement = createTreeElement(TRASH_NAME, $icon, [TRASH], false, true, false, isOpened);
-            $trashElement.addClass('root');
+            $trashElement.addClass('cp-app-drive-tree-root');
             $trashElement.find('>.cp-app-drive-element-row')
                          .contextmenu(openContextMenu('trashtree'));
             var $trashList = $('<ul>', { 'class': 'cp-app-drive-tree-category' })
@@ -3139,6 +3150,16 @@ define([
                         href = data.roHref;
                     }
                     openFile(null, href);
+                });
+            }
+            else if ($(this).hasClass('cp-app-drive-context-download')) {
+                if (paths.length !== 1) { return; }
+                el = manager.find(paths[0].path);
+                if (!manager.isFile(el)) { return; }
+                data = manager.getFileData(el);
+                APP.FM.downloadFile(data, function (err, obj) {
+                    console.log(err, obj);
+                    console.log('DONE');
                 });
             }
             else if ($(this).hasClass('cp-app-drive-context-share')) {

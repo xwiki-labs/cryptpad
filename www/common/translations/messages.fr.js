@@ -564,7 +564,8 @@ define(function () {
     out.settings_backup2Confirm = "Vous allez télécharger tous les pads de votre CryptDrive. Si vous souhaitez continuer, choisissez un nom et appuyez sur OK.";
     out.settings_exportTitle = "Téléchargement de votre CryptDrive";
     out.settings_exportDescription = "Veuillez patienter pendant que nous téléchargeons et déchiffrons vos documents. Cette opération peut prendre plusieurs minutes. Fermer l'onglet du navigateur interrompra le processus.";
-    out.settings_exportWarning = "Pour de meilleures performances, il est recommandé de ne pas changer d'onglet pendant le téléchargement.";
+    out.settings_exportFailed = "Si un pad nécessite plus d'une minute pour être traité, il ne sera pas inclus dans l'archive. Une liste des pads n'ayant pas été exportés sera disponible à la fin.";
+    out.settings_exportWarning = "Note: cet outil est encore un prototype et peut rencontrer des difficultés lors de l'export. Pour de meilleures performances, il est recommandé de ne pas changer d'onglet pendant le téléchargement.";
     out.settings_exportCancel = "Êtes-vous sûr de vouloir annuler ce téléchargement ? Vous devrez recommencer du début la prochaine fois.";
     out.settings_export_reading = "Lecture de votre CryptDrive...";
     out.settings_export_download = "Téléchargement et déchiffrement des documents...";
@@ -638,6 +639,7 @@ define(function () {
 
     out.settings_codeIndentation = "Indentation dans l'éditeur de code (nombre d'espaces)";
     out.settings_codeUseTabs = "Utiliser des tabulations au lieu d'espaces";
+    out.settings_codeFontSize = "Taille de la police dans l'éditeur de code (px)";
 
     out.settings_padWidth = "Largeur de l'éditeur de texte";
     out.settings_padWidthHint = "L'éditeur de documents texte occupe toute la largeur de l'écran disponible par défaut, ce qui peut rendre le texte difficile à lire. Vous pouvez ici réduire la largeur de l'éditeur.";
@@ -664,6 +666,7 @@ define(function () {
     out.settings_changePasswordNewPasswordSameAsOld = "Votre nouveau mot de passe doit être différent de votre mot de passe actuel.";
 
     out.upload_title = "Hébergement de fichiers";
+    out.upload_type = "Type";
     out.upload_modal_title = "Options d'importation du fichier";
     out.upload_modal_filename = "Nom (extension <em>{0}</em> ajoutée automatiquement)";
     out.upload_modal_owner = "Être propriétaire du fichier";
@@ -681,9 +684,13 @@ define(function () {
     out.upload_size = "Taille";
     out.upload_progress = "État";
     out.upload_mustLogin = "Vous devez vous connecter pour importer un fichier";
+    out.upload_up = "Envoyer";
     out.download_button = "Déchiffrer et télécharger";
     out.download_mt_button = "Télécharger";
     out.download_resourceNotAvailable = "Le fichier demandé n'est pas disponible... Appuyez sur Échap pour continuer.";
+    out.download_dl = "Télécharger";
+    out.download_step1 = "Téléchargement";
+    out.download_step2 = "Déchiffrement";
 
     out.todo_title = "CryptTodo";
     out.todo_newTodoNamePlaceholder = "Décrivez votre tâche...";
