@@ -800,7 +800,17 @@ define([
                 module.ckeditor = editor = Ckeditor.replace('editor1', {
                     customConfig: '/customize/ckeditor-config.js',
                 });
-                editor.on('instanceReady', waitFor());
+                editor.on('instanceReady', waitFor(function () {
+                    //Filter through the existing contentRules, looking for styleCommands
+                    try {
+                        $.each(editor.activeFilter.allowedContent, function(i,v) {
+                            var name = v.featureName, command = editor.commands[v.featureName];
+                            if (name && command && command.contentForms && command.style) {
+                                command.style._.definition.alwaysRemoveElement = true;
+                            }
+                        });
+                    } catch (e) {}
+                }));
             }).nThen(function () {
                 editor.plugins.mediatag.import = function ($mt) {
                     framework._.sfCommon.importMediaTag($mt);
