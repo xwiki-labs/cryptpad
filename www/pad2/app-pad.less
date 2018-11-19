@@ -1,0 +1,107 @@
+@import (reference) "../../customize/src/less2/include/framework.less";
+
+body.cp-app-pad {
+    .framework_main(
+        @bg-color: @colortheme_pad-bg,
+        @warn-color: @colortheme_pad-warn,
+        @color: @colortheme_pad-color
+    );
+
+    display: flex;
+    flex-flow: column;
+    max-height: 100%;
+    min-height: auto;
+
+
+    #cp-app-pad {
+        flex: 1;
+        display: flex;
+        flex-flow: row;
+        height: 100%;
+        overflow: hidden;
+        .ck-editor {
+            flex: 1;
+            display: flex;
+            flex-flow: column;
+            .ck-editor__main {
+                flex: 1;
+                display: flex;
+                flex-flow: column;
+                overflow: auto;
+                .ck-content {
+                    flex: 1;
+                }
+            }
+        }
+    }
+
+    #cke_1_top {
+        overflow: visible;
+        padding: 0px;
+    }
+    .cke_toolbox_main {
+        background-color: @colortheme_pad-toolbar-bg;
+        .cke_toolbar {
+            height: 28px;
+            padding: 2px 0;
+        }
+    }
+    .cke_wysiwyg_frame {
+        width: 100%;
+    }
+    #cke_editor1 {
+        display: flex;
+        flex-flow: column;
+        height: 100%;
+        border: 0;
+        > .cke_inner {
+            overflow: hidden;
+            flex: 1;
+            position: unset;
+            display: flex;
+            margin-top: -1px;
+            #cke_1_contents {
+                flex: 1;
+                display: flex;
+                flex-flow: column;
+                height: auto !important;
+                iframe {
+                    flex: 1;
+                }
+            }
+        }
+    }
+
+    .cke_dialog {
+        display: block;
+        overflow-x: auto;
+        max-height: 100vh;
+        .cke_dialog_contents {
+            #ck-mediatag-preview {
+                margin: auto;
+                resize: both;
+                max-width: 300px;
+                max-height: 300px;
+                overflow: auto;
+            }
+            media-tag {
+                display: flex;
+                border-style: solid;
+                border-color: black;
+            }
+        }
+    }
+
+    .cke_wysiwyg_frame {
+        min-width: 60%;
+    }
+
+    @media print {
+        #cke_1_top {
+            display:none !important;
+        }
+        &.cp-app-pad .cp-toolbar-userlist-drawer {
+            display:none;
+        }
+    }
+}
