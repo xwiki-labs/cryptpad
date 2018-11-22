@@ -85,10 +85,19 @@ define([
             h('div.row.justify-content-sm-center',[
                 h('div.col-12.col-sm-4.cp-index-block.cp-index-block-host', h('div', [
                     Pages.setHTML(h('span'), Msg.home_host),
-                    h('img', {
-                        src: "/customize/images/AGPL.png",
-                        title: Msg.home_host_agpl
-                    })
+                    h('div.cp-img-container', [
+                        h('img.agpl', {
+                            src: "/customize/images/AGPL.png",
+                            title: Msg.home_host_agpl
+                        }),
+                        h('a.img', {
+                            href: 'https://blog.cryptpad.fr/2018/11/13/CryptPad-receives-NGI-Startup-Award/',
+                            target: '_blank'
+                        }, h('img.ngi', {
+                            src: "/customize/images/ngi.png",
+                            title: Msg.home_ngi
+                        }))
+                    ])
                 ])),
                 h('div.col-12.col-sm-4.cp-index-block.cp-index-block-product', h('div', [
                     Msg.home_product

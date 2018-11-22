@@ -4,9 +4,8 @@ define([
     '/common/common-util.js',
     '/common/common-interface.js',
     '/common/hyperscript.js',
-    '/bower_components/marked/marked.min.js',
-    '/common/media-tag.js',
-], function ($, Messages, Util, UI, h, Marked, MediaTag) {
+    '/common/diffMarked.js',
+], function ($, Messages, Util, UI, h, DiffMd) {
     'use strict';
 
     var debug = console.log;
@@ -138,12 +137,14 @@ define([
         $(window).on('resize', onResize);
 
         var m = function (md, hour) {
-            var d = h('div.cp-app-contacts-content');
+            var id = Util.createRandomInteger();
+            var d = h('div', {
+                id: 'msg-'+id
+            });
             try {
-                d.innerHTML = Marked(md || '');
                 var $d = $(d);
-                // remove potentially malicious elements
-                $d.find('script, iframe, object, applet, video, audio').remove();
+                DiffMd.apply(DiffMd.render(md || '', true), $d, common);
+                $d.addClass("cp-app-contacts-content");
 
                 // override link clicking, because we're in an iframe
                 $d.find('a').each(function () {
@@ -152,9 +153,6 @@ define([
                         common.openUnsafeURL(href);
                     }).attr('href');
                 });
-
-                // activate media-tags
-                $d.find('media-tag').each(function (i, e) { MediaTag(e); });
 
                 var time = h('div.cp-app-contacts-time', hour);
                 $d.append(time);
@@ -257,12 +255,6 @@ define([
                         if (msg.type !== 'MSG') { return; }
 
                     // FIXME Schlameil the painter (performance does not scale well)
-                        // XXX trust the server?
-                        /*
-                        if (channel.messages.some(function (old) {
-                            return msg.sig === old.sig;
-                        })) { return; }*/
-
                         channel.messages.unshift(msg);
                         var el_message = markup.message(msg);
                         $messagebox.prepend(el_message);
@@ -285,7 +277,7 @@ define([
                             UI.alert(Messages.contacts_removeHistoryServerError);
                             return;
                         }
-                        // XXX clear the UI?
+                        // TODO clear the UI
                     });
                 });
             });
@@ -451,7 +443,7 @@ define([
             $messages.find('div.cp-app-contacts-chat[data-key]').hide();
             if ($chat.length) {
                 var $chat_messages = $chat.find('div.cp-app-contacts-message');
-                if ($chat_messages.length < 10) { //|| channel.needMoreHistory) { XXX
+                if ($chat_messages.length < 10) {
                     delete channel.needMoreHistory;
                     var $more = $chat.find('.cp-app-contacts-more-history');
                     $more.click();

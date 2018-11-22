@@ -686,6 +686,7 @@ define([
             return hjson;
         });
 
+
         /* hitting enter makes a new line, but places the cursor inside
             of the <br> instead of the <p>. This makes it such that you
             cannot type until you click, which is rather unnacceptable.
@@ -695,6 +696,18 @@ define([
             the first such keypress will not be inserted into the P. */
         inner.addEventListener('keydown', cursor.brFix);
 
+        /*
+            CkEditor emits a change event when it detects new content in the editable area.
+            Our problem is that this event is sent asynchronously and late after a keystroke.
+            The result is that between the keystroke and the change event, chainpad may
+            receive remote changes and so it can wipe the newly inserted content (because
+            chainpad work synchronously), and the merged text is missing a few characters.
+            To fix this, we have to call `framework.localChange` sooner. We can't listen for
+            the "keypress" event because it is trigger before the character is inserted.
+            The solution is the "input" event, triggered by the browser as soon as the
+            character is inserted.
+        */
+        inner.addEventListener('input', framework.localChange);
         editor.on('change', framework.localChange);
 
         // export the typing tests to the window.
@@ -704,12 +717,23 @@ define([
             cursor.update();
             //var start = cursor.Range.start;
             //var test = TypingTest.testInput(inner, start.el, start.offset, framework.localChange);
-            var test = TypingTest.testInput2(editor);
+            var test = TypingTest.testPad(editor, framework.localChange);
             framework.localChange();
             return test;
         };
 
-        $bar.find('.cke_button').click(function () {
+
+        // Fix the scrollbar if it's reset when clicking on a button (firefox only?)
+        var buttonScrollTop;
+        $('.cke_toolbox_main').find('.cke_button').mousedown(function () {
+            buttonScrollTop = $('iframe').contents().scrollTop();
+            setTimeout(function () {
+                $('iframe').contents().scrollTop(buttonScrollTop);
+            });
+        });
+
+
+        $('.cke_toolbox_main').find('.cke_button').click(function () {
             var e = this;
             var classString = e.getAttribute('class');
             var classes = classString.split(' ').filter(function (c) {
