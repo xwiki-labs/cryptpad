@@ -314,15 +314,17 @@ define([
                     return true;
                 }
 
-                return; // XXX
+/*
                 cursor.update();
 
                 // no use trying to recover the cursor if it doesn't exist
                 if (!cursor.exists()) { return; }
+*/
 
                 /*  frame is either 0, 1, 2, or 3, depending on which
                     cursor frames were affected: none, first, last, or both
                 */
+/*
                 var frame = info.frame = cursor.inNode(info.node);
 
                 if (!frame) { return; }
@@ -334,20 +336,15 @@ define([
                     if (frame & 1) {
                         // push cursor start if necessary
                         cursor.transformRange(cursor.Range.start, ops);
-                        /*if (pushes.commonStart < cursor.Range.start.offset) {
-                            cursor.Range.start.offset += pushes.delta;
-                        }*/
                     }
                     if (frame & 2) {
                         // push cursor end if necessary
                         cursor.transformRange(cursor.Range.end, ops);
-                        /*if (pushes.commonStart < cursor.Range.end.offset) {
-                            cursor.Range.end.offset += pushes.delta;
-                        }*/
                     }
                 }
+*/
             },
-            postDiffApply: function (info) {
+            postDiffApply: function (/*info*/) {
                 /*
                 if (info.frame) {
                     if (info.node) {

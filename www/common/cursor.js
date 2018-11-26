@@ -50,15 +50,13 @@ define([
                     return offsetInNode(path.shift(), offset, path, range);
                 }
                 // It is not yet our path, add the length of the text node or tag's outerHTML
-                offset += (getTextNodeValue(element.childNodes[i]) || element.childNodes[i].outerHTML).length
+                offset += (getTextNodeValue(element.childNodes[i]) || element.childNodes[i].outerHTML).length;
             }
         };
 
         // Get the cursor position as a range and transform it into
         // an offset from the beginning of the outer HTML
         var getOffsetFromRange = function (element) {
-            var start = 0;
-            var end = 0;
             var doc = element.ownerDocument || element.document;
             var win = doc.defaultView || doc.parentWindow;
             var o = {
@@ -66,7 +64,7 @@ define([
                 end: 0
             };
             if (typeof win.getSelection !== "undefined") {
-                sel = win.getSelection();
+                var sel = win.getSelection();
                 if (sel.rangeCount > 0) {
                     var range = win.getSelection().getRangeAt(0);
                     // Do it for both start and end
@@ -171,7 +169,7 @@ define([
             // their length.
             var newOffset = offset;
             for (var i = 0; i < el.childNodes.length; i++) {
-                newOffset -= (getTextNodeValue(el.childNodes[i]) || el.childNodes[i].outerHTML).length
+                newOffset -= (getTextNodeValue(el.childNodes[i]) || el.childNodes[i].outerHTML).length;
                 if (newOffset <= 0) {
                     return getFinalRange(el.childNodes[i], offset);
                 }
