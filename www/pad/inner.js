@@ -314,6 +314,7 @@ define([
                     return true;
                 }
 
+                return; // XXX
                 cursor.update();
 
                 // no use trying to recover the cursor if it doesn't exist
@@ -347,6 +348,7 @@ define([
                 }
             },
             postDiffApply: function (info) {
+                /*
                 if (info.frame) {
                     if (info.node) {
                         if (info.frame & 1) { cursor.fixStart(info.node); }
@@ -358,6 +360,7 @@ define([
 
                     cursor.fixSelection(sel, range);
                 }
+                */
             }
         };
     };
@@ -519,12 +522,21 @@ define([
             userDocStateDom.normalize();
             inner.normalize();
 
+
+
             $(userDocStateDom).find('span[data-cke-display-name="media-tag"]:empty').each(function (i, el) {
                 $(el).remove();
             });
 
+            cursor.offsetUpdate();
+            var oldText = inner.outerHTML;
+
             var patch = (DD).diff(inner, userDocStateDom);
             (DD).apply(inner, patch);
+
+            var newText = inner.outerHTML;
+            var ops = ChainPad.Diff.diff(oldText, newText);
+            cursor.restoreOffset(ops);
 
             // MEDIATAG: Migrate old mediatags to the widget system
             $(inner).find('media-tag:not(.cke_widget_element)').each(function (i, el) {
@@ -714,9 +726,6 @@ define([
         // call like `test = easyTest()`
         // terminate the test like `test.cancel()`
         window.easyTest = function () {
-            cursor.update();
-            //var start = cursor.Range.start;
-            //var test = TypingTest.testInput(inner, start.el, start.offset, framework.localChange);
             var test = TypingTest.testPad(editor, framework.localChange);
             framework.localChange();
             return test;
