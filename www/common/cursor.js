@@ -23,7 +23,7 @@ define([
         };
 
         // Get the length of the opening tag of an node (<body class="cp"> ==> 17)
-        var getOpenerTagLength = function (node) {
+        var getOpeningTagLength = function (node) {
             if (node.nodeType === node.TEXT_NODE) { return 0; }
             var html = node.outerHTML;
             var tagRegex = /^(<\s*[a-zA-Z-]*[^>]*>)(.+)/;
@@ -36,7 +36,7 @@ define([
         // path to the range
         var offsetInNode = function (element, offset, path, range) {
             if (path.length === 0) {
-                offset += getOpenerTagLength(range.el);
+                offset += getOpeningTagLength(range.el);
                 if (range.el.nodeType === range.el.TEXT_NODE) {
                     var div = document.createElement('div');
                     div.innerText = range.el.data.slice(0, range.offset);
@@ -44,7 +44,7 @@ define([
                 }
                 return offset + range.offset;
             }
-            offset += getOpenerTagLength(element);
+            offset += getOpeningTagLength(element);
             for (var i = 0; i < element.childNodes.length; i++) {
                 if (element.childNodes[i] === path[0]) {
                     return offsetInNode(path.shift(), offset, path, range);
@@ -94,9 +94,13 @@ define([
         // Update the value of the offset
         // This should be called before applying changes to the document
         cursor.offsetUpdate = function () {
-            var range = getOffsetFromRange(inner);
-            offsetRange.start = range.start;
-            offsetRange.end = range.end;
+            try {
+                var range = getOffsetFromRange(inner);
+                offsetRange.start = range.start;
+                offsetRange.end = range.end;
+            } catch (e) {
+                console.error(e);
+            }
         };
 
         // Transform the offset value using the operations from the diff
@@ -153,7 +157,7 @@ define([
             }
 
             // Remove the current tag opening length
-            offset = offset - getOpenerTagLength(el);
+            offset = offset - getOpeningTagLength(el);
 
             if (offset <= 0) {
                 // Return the current node...
@@ -174,6 +178,17 @@ define([
                     return getFinalRange(el.childNodes[i], offset);
                 }
                 offset = newOffset;
+            }
+
+            // New offset ends up in the closing tag
+            // ==> return the last child...
+            if (el.childNodes.length) {
+                return getFinalRange(el.childNodes[el.childNodes.length - 1], offset);
+            } else {
+                return {
+                    el: el,
+                    offset: 0
+                };
             }
         };
 
@@ -203,15 +218,19 @@ define([
 
         // Restore the cursor position after applying the changes.
         cursor.restoreOffset = function (ops) {
-            offsetRange.start = offsetTransformRange(offsetRange.start, ops);
-            offsetRange.end = offsetTransformRange(offsetRange.end, ops);
-            var range = getRangeFromOffset(inner);
-            var sel = cursor.makeSelection();
-            var r = cursor.makeRange();
-            cursor.fixStart(range.start.el, range.start.offset);
-            cursor.fixEnd(range.end.el, range.end.offset);
-            cursor.fixSelection(sel, r);
-            cursor.brFix();
+            try {
+                offsetRange.start = offsetTransformRange(offsetRange.start, ops);
+                offsetRange.end = offsetTransformRange(offsetRange.end, ops);
+                var range = getRangeFromOffset(inner);
+                var sel = cursor.makeSelection();
+                var r = cursor.makeRange();
+                cursor.fixStart(range.start.el, range.start.offset);
+                cursor.fixEnd(range.end.el, range.end.offset);
+                cursor.fixSelection(sel, r);
+                cursor.brFix();
+            } catch (e) {
+                console.error(e);
+            }
         };
 
         // there ought to only be one cursor at a time, so let's just
