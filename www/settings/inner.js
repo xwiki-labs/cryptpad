@@ -52,12 +52,16 @@ define([
             'cp-settings-displayname',
             'cp-settings-language-selector',
             'cp-settings-logout-everywhere',
-            'cp-settings-autostore',
             'cp-settings-userfeedback',
             'cp-settings-change-password',
             'cp-settings-migrate',
             'cp-settings-backup',
             'cp-settings-delete'
+        ],
+        'security': [
+            'cp-settings-autostore',
+            'cp-settings-store-passwords',
+            'cp-settings-passwords'
         ],
         'creation': [
             'cp-settings-creation-owned',
@@ -114,6 +118,24 @@ define([
     }
 
     var create = {};
+
+    var makeBlock = function (key, getter, full) {
+        var safeKey = key.replace(/-([a-z])/g, function (g) { return g[1].toUpperCase(); });
+
+        create[key] = function (common) {
+            var $div = $('<div>', {'class': 'cp-settings-' + key + ' cp-sidebarlayout-element'});
+            if (full) {
+                $('<label>').text(Messages['settings_'+safeKey+'Title'] || key).appendTo($div);
+                $('<span>', {'class': 'cp-sidebarlayout-description'})
+                    .text(Messages['settings_'+safeKey+'Hint'] || 'Coming soon...').appendTo($div);
+            }
+            getter(common, function (content) {
+                $div.append(content);
+            }, $div);
+            return $div;
+        };
+    };
+
 
     // Account settings
 
@@ -282,6 +304,37 @@ define([
 
         return $div;
     };
+
+    makeBlock('store-passwords', function (common, cb) {
+        var $ok = $('<span>', {'class': 'fa fa-check', title: Messages.saved}).hide();
+        var $spinner = $('<span>', {'class': 'fa fa-spinner fa-pulse'}).hide();
+
+        var $cbox = $(UI.createCheckbox('cp-settings-store-passwords',
+                                   Messages.settings_storePasswordsBox,
+                                   true, { label: {class: 'noTitle'} }));
+
+        var $checkbox = $cbox.find('input').on('change', function () {
+            $spinner.show();
+            $ok.hide();
+            var val = !($checkbox.is(':checked') || false);
+            common.setAttribute(['general', 'forgetPasswords'], val, function () {
+                $spinner.hide();
+                $ok.show();
+            });
+        });
+
+        var val = Util.find(privateData, ['settings', 'general', 'forgetPasswords']);
+        if (val) {
+            $checkbox[0].checked = false;
+        }
+
+        var content = [
+            $cbox[0],
+            $ok[0],
+            $spinner[0]
+        ];
+        cb(content);
+    }, true);
 
     create['userfeedback'] = function () {
         var $div = $('<div>', { 'class': 'cp-settings-userfeedback cp-sidebarlayout-element'});
@@ -1578,6 +1631,7 @@ define([
             if (key === 'code') { $category.append($('<span>', {'class': 'fa fa-file-code-o' })); }
             if (key === 'pad') { $category.append($('<span>', {'class': 'fa fa-file-word-o' })); }
             if (key === 'creation') { $category.append($('<span>', {'class': 'fa fa-plus-circle' })); }
+            if (key === 'security') { $category.append($('<span>', {'class': 'fa fa-lock' })); }
             if (key === 'subscription') { $category.append($('<span>', {'class': 'fa fa-star-o' })); }
 
             if (key === active) {
@@ -1638,7 +1692,7 @@ define([
         var addItem = function (cssClass) {
             var item = cssClass.slice(12); // remove 'cp-settings-'
             if (typeof (create[item]) === "function") {
-                $rightside.append(create[item]());
+                $rightside.append(create[item](common));
             }
         };
         for (var cat in categories) {

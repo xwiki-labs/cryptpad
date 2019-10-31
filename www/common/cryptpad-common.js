@@ -555,12 +555,12 @@ define([
 
         Nthen(function (waitFor) {
             if (parsed.hashData && parsed.hashData.password) {
-                common.getPadAttribute('password', waitFor(function (err, password) {
+                common.getPadAttribute('password', waitFor(function (err, password) { // XXX no password
                     optsGet.password = password;
                 }), href);
             }
             if (parsed2.hashData && parsed2.hashData.password && !optsPut.password) {
-                common.getPadAttribute('password', waitFor(function (err, password) {
+                common.getPadAttribute('password', waitFor(function (err, password) { // XXX no password
                     optsPut.password = password;
                 }));
             }
@@ -883,8 +883,8 @@ define([
 
         Nthen(function (waitFor) {
             if (parsed.hashData && parsed.hashData.password) {
-                common.getPadAttribute('password', waitFor(function (err, password) {
-                    optsGet.password = password;
+                common.getPadAttribute('password', waitFor(function (err, password) { // XXX no password
+                    optsGet.password = password || data.oldPassword;
                 }), href);
             }
         }).nThen(function (waitFor) {
@@ -928,7 +928,6 @@ define([
                 } else if (mailbox && typeof(mailbox) === "object") {
                     m = {};
                     Object.keys(mailbox).forEach(function (ed) {
-                        console.log(mailbox[ed]);
                         try {
                             m[ed] = newCrypto.encrypt(oldCrypto.decrypt(mailbox[ed], true, true));
                         } catch (e) {
@@ -1062,8 +1061,8 @@ define([
         var Upload;
         Nthen(function (waitFor) {
             if (parsed.hashData && parsed.hashData.password) {
-                common.getPadAttribute('password', waitFor(function (err, password) {
-                    oldPassword = password || '';
+                common.getPadAttribute('password', waitFor(function (err, password) { // XXX no password
+                    oldPassword = password || data.oldPassword || '';
                 }), href);
             }
         }).nThen(function (waitFor) {

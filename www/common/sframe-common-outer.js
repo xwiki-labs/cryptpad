@@ -29,7 +29,8 @@ define([
         var Test;
         var password;
         var initialPathInDrive;
-
+        var noPassword = localStorage.CryptPad_dev === "1";
+        noPassword = false; // XXX
         nThen(function (waitFor) {
             // Load #2, the loading screen is up so grab whatever you need...
             require([
@@ -223,8 +224,6 @@ define([
                                 if (wrongPasswordStored) {
                                     // Store the correct password
                                     nThen(function (w) {
-                                        // XXX noPasswordStored: return; ?
-                                        Cryptpad.setPadAttribute('password', password, w(), parsed.getUrl());
                                         Cryptpad.setPadAttribute('channel', secret.channel, w(), parsed.getUrl());
                                         if (parsed.hashData.mode === 'edit') {
                                             var href = window.location.pathname + '#' + Utils.Hash.getEditHashFromKeys(secret);
@@ -232,6 +231,8 @@ define([
                                             var roHref = window.location.pathname + '#' + Utils.Hash.getViewHashFromKeys(secret);
                                             Cryptpad.setPadAttribute('roHref', roHref, w(), parsed.getUrl());
                                         }
+                                        if (noPassword) { return; } // XXX no password
+                                        Cryptpad.setPadAttribute('password', password, w(), parsed.getUrl());
                                     }).nThen(correctPassword);
                                 } else {
                                     correctPassword();
@@ -505,7 +506,7 @@ define([
                 currentTitle = newTitle;
                 setDocumentTitle();
                 var data = {
-                    password: password,
+                    password: noPassword ? null : password,
                     title: newTitle,
                     channel: secret.channel,
                     path: initialPathInDrive // Where to store the pad if we don't have it in our drive
@@ -528,7 +529,7 @@ define([
             });
             sframeChan.on('Q_AUTOSTORE_STORE', function (obj, cb) {
                 var data = {
-                    password: password,
+                    password: noPassword ? null : password,
                     title: currentTitle,
                     channel: secret.channel,
                     path: initialPathInDrive, // Where to store the pad if we don't have it in our drive
@@ -552,7 +553,7 @@ define([
                     Cryptpad.addSharedFolder(null, secret, cb);
                 } else {
                     var _data = {
-                        password: data.password,
+                        password: noPassword ? null : data.password,
                         href: data.href,
                         channel: data.channel,
                         title: data.title,

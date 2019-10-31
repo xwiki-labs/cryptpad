@@ -73,7 +73,8 @@ define([
     var getPropertiesData = function (common, cb) {
         var data = {};
         NThen(function (waitFor) {
-            var base = common.getMetadataMgr().getPrivateData().origin;
+            var priv = common.getMetadataMgr().getPrivateData();
+            var base = priv.origin;
             common.getPadAttribute('', waitFor(function (err, val) {
                 if (err || !val) {
                     waitFor.abort();
@@ -511,6 +512,7 @@ define([
             if (data.href || data.roHref) {
                 parsed = Hash.parsePadUrl(data.href || data.roHref);
             }
+            var needPassword = parsed.hashData.password;
             if (owned && parsed.hashData.type === 'pad') {
                 var manageOwners = h('button.no-margin', Messages.owner_openModalButton);
                 $(manageOwners).click(function () {
@@ -536,8 +538,8 @@ define([
             }
 
             if (!data.noPassword) {
-                var hasPassword = data.password;
-                if (hasPassword) {
+                var hasPassword = parsed.hashData.password;
+                if (data.password) {
                     $('<label>', {'for': 'cp-app-prop-password'}).text(Messages.creation_passwordValue)
                         .appendTo($d);
                     var password = UI.passwordInput({
@@ -576,69 +578,81 @@ define([
                     ]);
                     var pLocked = false;
                     $(passwordOk).click(function () {
-                        var newPass = $(newPassword).find('input').val();
-                        if (data.password === newPass ||
-                            (!data.password && !newPass)) {
-                            return void UI.alert(Messages.properties_passwordSame);
-                        }
-                        if (pLocked) { return; }
-                        pLocked = true;
-                        UI.confirm(changePwConfirm, function (yes) {
-                            if (!yes) { pLocked = false; return; }
-                            $(passwordOk).html('').append(h('span.fa.fa-spinner.fa-spin', {style: 'margin-left: 0'}));
-                            var q = isFile ? 'Q_BLOB_PASSWORD_CHANGE' : 'Q_PAD_PASSWORD_CHANGE';
-
-                            // If this is a file password change, register to the upload events:
-                            // * if there is a pending upload, ask if we shoudl interrupt
-                            // * display upload progress
-                            var onPending;
-                            var onProgress;
-                            if (isFile) {
-                                onPending = sframeChan.on('Q_BLOB_PASSWORD_CHANGE_PENDING', function (data, cb) {
-                                    onPending.stop();
-                                    UI.confirm(Messages.upload_uploadPending, function (yes) {
-                                        cb({cancel: yes});
-                                    });
-                                });
-                                onProgress = sframeChan.on('EV_BLOB_PASSWORD_CHANGE_PROGRESS', function (data) {
-                                    if (typeof (data) !== "number") { return; }
-                                    var p = Math.round(data);
-                                    $(passwordOk).text(p + '%');
-                                });
+                        var oldPassword = data.password;
+                        NThen(function (waitFor) {
+                            if (!data.password && needPassword) {
+                                UI.prompt("Current pw?", "", waitFor(function (p) {
+                                    oldPassword = p;
+                                }), { password: true });
                             }
+                        }).nThen(function () {
+                            var newPass = $(newPassword).find('input').val();
+                            if (oldPassword === newPass ||
+                                (!oldPassword && !newPass)) {
+                                return void UI.alert(Messages.properties_passwordSame);
+                            }
+                            if (pLocked) { return; }
+                            pLocked = true;
+                            UI.confirm(changePwConfirm, function (yes) {
+                                if (!yes) { pLocked = false; return; }
+                                $(passwordOk).html('').append(h('span.fa.fa-spinner.fa-spin', {style: 'margin-left: 0'}));
+                                var q = isFile ? 'Q_BLOB_PASSWORD_CHANGE' : 'Q_PAD_PASSWORD_CHANGE';
 
-                            sframeChan.query(q, {
-                                teamId: typeof(owned) !== "boolean" ? owned : undefined,
-                                href: data.href || data.roHref,
-                                password: newPass
-                            }, function (err, data) {
-                                $(passwordOk).text(Messages.properties_changePasswordButton);
-                                pLocked = false;
-                                if (err || data.error) {
-                                    console.error(err || data.error);
-                                    return void UI.alert(Messages.properties_passwordError);
-                                }
-                                UI.findOKButton().click();
+                                // If this is a file password change, register to the upload events:
+                                // * if there is a pending upload, ask if we shoudl interrupt
+                                // * display upload progress
+                                var onPending;
+                                var onProgress;
                                 if (isFile) {
-                                    onProgress.stop();
+                                    onPending = sframeChan.on('Q_BLOB_PASSWORD_CHANGE_PENDING', function (data, cb) {
+                                        onPending.stop();
+                                        UI.confirm(Messages.upload_uploadPending, function (yes) {
+                                            cb({cancel: yes});
+                                        });
+                                    });
+                                    onProgress = sframeChan.on('EV_BLOB_PASSWORD_CHANGE_PROGRESS', function (data) {
+                                        if (typeof (data) !== "number") { return; }
+                                        var p = Math.round(data);
+                                        $(passwordOk).text(p + '%');
+                                    });
+                                }
+
+                                sframeChan.query(q, {
+                                    teamId: typeof(owned) !== "boolean" ? owned : undefined,
+                                    href: data.href || data.roHref,
+                                    oldPassword: oldPassword,
+                                    password: newPass
+                                }, function (err, data) {
                                     $(passwordOk).text(Messages.properties_changePasswordButton);
-                                    var alertMsg = data.warning ? Messages.properties_passwordWarningFile
-                                                                : Messages.properties_passwordSuccessFile;
-                                    return void UI.alert(alertMsg, undefined, {force: true});
-                                }
-                                // If we didn't have a password, we have to add the /p/
-                                // If we had a password and we changed it to a new one, we just have to reload
-                                // If we had a password and we removed it, we have to remove the /p/
-                                if (data.warning) {
-                                    return void UI.alert(Messages.properties_passwordWarning, function () {
-                                        common.gotoURL(hasPassword && newPass ? undefined : (data.href || data.roHref));
-                                    }, {force: true});
-                                }
-                                return void UI.alert(Messages.properties_passwordSuccess, function () {
-                                    if (!isSharedFolder) {
-                                        common.gotoURL(hasPassword && newPass ? undefined : (data.href || data.roHref));
+                                    pLocked = false;
+                                    if (err || data.error) {
+                                        console.error(err || data.error);
+                                        return void UI.alert(Messages.properties_passwordError);
                                     }
-                                }, {force: true});
+                                    UI.findOKButton().click();
+                                    if (isFile) {
+                                        onProgress.stop();
+                                        $(passwordOk).text(Messages.properties_changePasswordButton);
+                                        var alertMsg = data.warning ? Messages.properties_passwordWarningFile
+                                                                    : Messages.properties_passwordSuccessFile;
+                                        return void UI.alert(alertMsg, undefined, {force: true});
+                                    }
+                                    // If we didn't have a password, we have to add the /p/
+                                    // If we had a password and we changed it to a new one, we just have to reload
+                                    // If we had a password and we removed it, we have to remove the /p/
+                                    if (data.warning) {
+                                        return void UI.alert(Messages.properties_passwordWarning, function () {
+                                            if (priv.app === 'drive' || priv.app === 'teams') { return; }
+                                            common.gotoURL(hasPassword && newPass ? undefined : (data.href || data.roHref));
+                                        }, {force: true});
+                                    }
+                                    return void UI.alert(Messages.properties_passwordSuccess, function () {
+                                        if (!isSharedFolder) {
+                                            if (priv.app === 'drive' || priv.app === 'teams') { return; }
+                                            common.gotoURL(hasPassword && newPass ? undefined : (data.href || data.roHref));
+                                        }
+                                    }, {force: true});
+                                });
                             });
                         });
                     });

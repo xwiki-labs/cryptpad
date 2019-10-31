@@ -76,8 +76,13 @@ define([
             if (readOnly) { return void cb('EFORBIDDEN'); }
             var id = Util.createRandomInteger();
             var data = clone(_data);
+
             // If we were given an edit link, encrypt its value if needed
             if (data.href && data.href.indexOf('#') !== -1) { data.href = exp.cryptor.encrypt(data.href); }
+
+            // Remove the password if needed // XXX
+            if (config.noPasswords) { delete data.password; }
+
             files[FILES_DATA][id] = data;
             cb(null, id);
         };

@@ -22,6 +22,7 @@ define([
         cfg.editKey = editKey;
         cfg.rt = lm.realtime;
         cfg.readOnly = Boolean(!editKey);
+        // cfg.noPasswords = ; // XXX XXX
         var userObject = UserObject.init(lm.proxy, cfg);
         if (userObject.fixFiles) {
             // Only in outer
@@ -854,6 +855,13 @@ define([
     var setPadAttribute = function (Env, data, cb) {
         cb = cb || function () {};
         if (!data.attr || !data.attr.trim()) { return void cb("E_INVAL_ATTR"); }
+
+        var parsed = Hash.parsePadUrl(data.href);
+        var noPasswords = Util.find(Env, ['settings', 'general', 'forgetPasswords']);
+        if (data.attr === 'password' && noPasswords && parsed.type !== 'drive') { // XXX
+            return void cb();
+        }
+
         var sfId = Env.user.userObject.getSFIdFromHref(data.href);
         if (sfId) {
             if (data.attr === "href") {
@@ -1074,6 +1082,7 @@ define([
             },
             folders: {}
         };
+        uoConfig.noPasswords = Util.find(data, ['settings', 'general', 'forgetPasswords']);
         uoConfig.removeProxy = function (id) {
             removeProxy(Env, id);
         };
