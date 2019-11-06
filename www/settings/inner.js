@@ -7,6 +7,7 @@ define([
     '/common/common-ui-elements.js',
     '/common/common-util.js',
     '/common/common-hash.js',
+    '/common/common-constants.js',
     '/customize/messages.js',
     '/common/hyperscript.js',
     '/common/common-credential.js',
@@ -29,6 +30,7 @@ define([
     UIElements,
     Util,
     Hash,
+    Constants,
     Messages,
     h,
     Cred,
@@ -332,6 +334,55 @@ define([
             $cbox[0],
             $ok[0],
             $spinner[0]
+        ];
+        cb(content);
+    }, true);
+
+    makeBlock('passwords', function (common, cb) {
+        var $ok = $('<span>', {'class': 'fa fa-check', title: Messages.saved}).hide();
+        var $spinner = $('<span>', {'class': 'fa fa-spinner fa-pulse'}).hide();
+
+        var val = Util.find(privateData, ['settings', 'general', 'forgetPasswords']);
+
+        var button = h('button.btn.btn-primary', 'MANAGE STORED PASSWORD'); // XXX
+
+        var getList = function (cb) {
+            sframeChan.query("Q_SETTINGS_DRIVE_GET", null, function (err, data) {
+                if (err) { return void console.error(err); }
+                var list = [];
+                console.error(data);
+                var drive = data.drive || {};
+                var filesData = drive[Constants.storageKey] || {};
+                var origin = privateData.origin;
+                Object.keys(filesData).forEach(function (id) {
+                    var d = filesData[id];
+                    if (!d.password) { return; }
+                    var href = origin + (d.href || d.roHref);
+                    list.push(h('tr', [
+                        h('td', d.filename || d.title),
+                        h('td', h('a', { href: href, target: "_blank" }, d.href || d.roHref)),
+                        h('td', d.password)
+                    ]));
+                });
+                console.log(list);
+                cb(list);
+            });
+        };
+
+        $(button).click(function () {
+            getList(function (lines) {
+                var table = h('table', lines);
+                UI.alert(table);
+                var $blockContainer = UIElements.createModal({
+                    id: 'cp-settings-passwords-dialog',
+                }).show();
+                $blockContainer.find('.cp-modal').append(table);
+            });
+            //UI.alert(pw);
+        });
+
+        var content = [
+            button
         ];
         cb(content);
     }, true);
