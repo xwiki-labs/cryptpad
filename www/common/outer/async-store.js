@@ -1005,6 +1005,9 @@ define([
             });
         };
         Store.setPadTitle = function (clientId, data, cb) {
+            if (store.offline) {
+                return void cb({ error: 'OFFLINE' });
+            }
             var title = data.title;
             var href = data.href;
             var channel = data.channel;
@@ -1831,6 +1834,11 @@ define([
             if (!cmdData || !cmdData.cmd) { return; }
             //var data = cmdData.data;
             var s = getStore(cmdData.teamId);
+            if (s.offline) {
+                var send = s.id ? s.sendEvent : sendDriveEvent;
+                send('NETWORK_DISCONNECT');
+                return void cb({ error: 'OFFLINE' });
+            }
             var cb2 = function (data2) {
                 // Send the CHANGE event to all the stores because the command may have
                 // affected data from a shared folder used by multiple teams.
@@ -2284,15 +2292,18 @@ define([
                 if (path[0] === 'drive' && path[1] === "migrate" && value === 1) {
                     rt.network.disconnect();
                     rt.realtime.abort();
-                    broadcast([], 'NETWORK_DISCONNECT');
+                    sendDriveEvent('NETWORK_DISCONNECT');
                 }
             });
 
+            // Proxy handlers (reconnect only called when the proxy is ready)
             rt.proxy.on('disconnect', function () {
-                broadcast([], 'NETWORK_DISCONNECT');
+                store.offline = true;
+                sendDriveEvent('NETWORK_DISCONNECT');
             });
-            rt.proxy.on('reconnect', function (info) {
-                broadcast([], 'NETWORK_RECONNECT', {myId: info.myId});
+            rt.proxy.on('reconnect', function () {
+                store.offline = false;
+                sendDriveEvent('NETWORK_RECONNECT');
             });
 
             // Ping clients regularly to make sure one tab was not closed without sending a removeClient()

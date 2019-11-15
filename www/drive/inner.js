@@ -58,6 +58,14 @@ define([
                             APP.newSharedFolder = null;
                         }
                     }
+                    if (newObj && newObj.deprecated) {
+                        delete folders[fId];
+                        delete drive.sharedFolders[fId];
+                        if (manager && manager.folders) {
+                            delete manager.folders[fId];
+                        }
+                        return;
+                    }
                     folders[fId] = folders[fId] || {};
                     copyObjectValue(folders[fId], newObj);
                     folders[fId].readOnly = !secret.keys.secondaryKey;
@@ -68,6 +76,16 @@ define([
                     if (!manager || !manager.folders[fId]) { return; }
                     manager.folders[fId].userObject.setReadOnly(readOnly, secret.keys.secondaryKey);
                 }));
+            });
+            // Remove from memory folders that have been deleted from the drive remotely
+            oldIds.forEach(function (fId) {
+                if (!drive.sharedFolders[fId]) {
+                    delete folders[fId];
+                    delete drive.sharedFolders[fId];
+                    if (manager && manager.folders) {
+                        delete manager.folders[fId];
+                    }
+                }
             });
         }).nThen(function () {
             cb();
@@ -117,7 +135,6 @@ define([
             SFCommon.create(waitFor(function (c) { common = c; }));
         }).nThen(function (waitFor) {
             $('#cp-app-drive-connection-state').text(Messages.disconnected);
-            $('#cp-app-drive-edition-state').text(Messages.readonly);
             var privReady = Util.once(waitFor());
             var metadataMgr = common.getMetadataMgr();
             if (JSON.stringify(metadataMgr.getPrivateData()) !== '{}') {
@@ -188,7 +205,6 @@ define([
                 common.createUsageBar(null, function (err, $limitContainer) {
                     if (err) { return void DriveUI.logError(err); }
                     APP.$limit = $limitContainer;
-                    $limitContainer.attr('title', Messages.drive_quota);
                 }, true);
             }
 
@@ -258,10 +274,10 @@ define([
                 APP.toolbar.failed();
                 if (!noAlert) { UI.alert(Messages.common_connectionLost, undefined, true); }
             };
-            var onReconnect = function (info) {
+            var onReconnect = function () {
                 setEditable(true);
                 if (drive.refresh) { drive.refresh(); }
-                APP.toolbar.reconnecting(info.myId);
+                APP.toolbar.reconnecting();
                 UI.findOKButton().click();
             };
 
@@ -271,9 +287,8 @@ define([
             sframeChan.on('EV_NETWORK_DISCONNECT', function () {
                 onDisconnect();
             });
-            sframeChan.on('EV_NETWORK_RECONNECT', function (data) {
-                // data.myId;
-                onReconnect(data);
+            sframeChan.on('EV_NETWORK_RECONNECT', function () {
+                onReconnect();
             });
             common.onLogout(function () { setEditable(false); });
         });

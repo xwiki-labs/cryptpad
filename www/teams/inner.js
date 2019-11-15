@@ -80,6 +80,16 @@ define([
                     manager.folders[fId].userObject.setReadOnly(readOnly, secret.keys.secondaryKey);
                 }));
             });
+            // Remove from memory folders that have been deleted from the drive remotely
+            oldIds.forEach(function (fId) {
+                if (!drive.sharedFolders[fId]) {
+                    delete folders[fId];
+                    delete drive.sharedFolders[fId];
+                    if (manager && manager.folders) {
+                        delete manager.folders[fId];
+                    }
+                }
+            });
         }).nThen(function () {
             cb();
         });
@@ -287,7 +297,7 @@ define([
 
             // Provide secondaryKey
             var teamData = (privateData.teams || {})[id] || {};
-            driveAPP.readOnly = !teamData.secondaryKey;
+            driveAPP.readOnly = !teamData.hasSecondaryKey;
             var drive = DriveUI.create(common, {
                 proxy: proxy,
                 folders: folders,
@@ -358,6 +368,7 @@ define([
         var content = [];
         APP.module.execCommand('LIST_TEAMS', null, function (obj) {
             if (!obj) { return; }
+            if (obj.error === "OFFLINE") { return UI.alert(Messages.driveOfflineError); }
             if (obj.error) { return void console.error(obj.error); }
             var list = [];
             var keys = Object.keys(obj).slice(0,3);
@@ -443,6 +454,7 @@ define([
                 name: name
             }, function (obj) {
                 if (obj && obj.error) {
+                    if (obj.error === "OFFLINE") { return UI.alert(Messages.driveOfflineError); }
                     console.error(obj.error);
                     $spinner.hide();
                     return void UI.warn(Messages.error);
@@ -475,7 +487,6 @@ define([
                 h('div#cp-app-drive-content-container', [
                     h('div#cp-app-drive-toolbar'),
                     h('div#cp-app-drive-connection-state', {style: "display: none;"}, Messages.disconnected),
-                    h('div#cp-app-drive-edition-state', {style: "display: none;"}, Messages.readonly),
                     h('div#cp-app-drive-content', {tabindex:2})
                 ])
             ])
@@ -496,6 +507,73 @@ define([
             }
             var roster = APP.refreshRoster(common, obj);
             $roster.empty().append(roster);
+        });
+    };
+
+    var makePermissions = function () {
+        var $blockContainer = UIElements.createModal({
+            id: 'cp-teams-roster-dialog',
+        }).show();
+
+        var makeRow = function (arr, first) {
+            return arr.map(function (val) {
+                return h(first ? 'th' : 'td', val);
+            });
+        };
+        // Global rights
+        var rows = [];
+        var firstRow = [Messages.teams_table_role, Messages.share_linkView, Messages.share_linkEdit,
+                            Messages.teams_table_admins, Messages.teams_table_owners];
+        rows.push(h('tr', makeRow(firstRow, true)));
+        rows.push(h('tr', makeRow([
+            Messages.team_viewers, h('span.fa.fa-check'), h('span.fa.fa-times'), h('span.fa.fa-times'), h('span.fa.fa-times')
+        ])));
+        rows.push(h('tr', makeRow([
+            Messages.team_members, h('span.fa.fa-check'), h('span.fa.fa-check'), h('span.fa.fa-times'), h('span.fa.fa-times')
+        ])));
+        rows.push(h('tr', makeRow([
+            Messages.team_admins, h('span.fa.fa-check'), h('span.fa.fa-check'), h('span.fa.fa-check'), h('span.fa.fa-times')
+        ])));
+        rows.push(h('tr', makeRow([
+            Messages.team_owner, h('span.fa.fa-check'), h('span.fa.fa-check'), h('span.fa.fa-check'), h('span.fa.fa-check')
+        ])));
+        var t = h('table.cp-teams-generic', rows);
+
+        var content = [
+            h('h4', Messages.teams_table_generic),
+            h('p', [
+                Messages.teams_table_generic_view,
+                h('br'),
+                Messages.teams_table_generic_edit,
+                h('br'),
+                Messages.teams_table_generic_admin,
+                h('br'),
+                Messages.teams_table_generic_own,
+                h('br')
+            ]),
+            t
+        ];
+
+        APP.module.execCommand('GET_EDITABLE_FOLDERS', {
+            teamId: APP.team
+        }, function (arr) {
+            if (!Array.isArray(arr) || !arr.length) {
+                return void $blockContainer.find('.cp-modal').append(content);
+            }
+            content.push(h('h5', Messages.teams_table_specific));
+            content.push(h('p', Messages.teams_table_specificHint));
+            var paths = arr.map(function (obj) {
+                obj.path.push(obj.name);
+                return h('li', obj.path.join('/'));
+            });
+            content.push(h('ul', paths));
+            /*
+            var rows = [];
+            rows.push(h('tr', makeRow(firstRow, true)));
+            rows.push(h('tr', makeRow([Messages.team_viewers, , , '', ''])));
+            content.push(h('table', rows));
+            */
+            $blockContainer.find('.cp-modal').append(content);
         });
     };
 
@@ -678,7 +756,7 @@ define([
         });
         var pending = Object.keys(roster).filter(function (k) {
             if (!roster[k].pending) { return; }
-            return roster[k].role === "MEMBER" || !roster[k].role;
+            return roster[k].role === "MEMBER" || roster[k].role === "VIEWER" || !roster[k].role;
         }).map(function (k) {
             return makeMember(common, roster[k], me);
         });
@@ -730,52 +808,7 @@ define([
         var table = h('button.btn.btn-primary', Messages.teams_table);
         $(table).click(function (e) {
             e.stopPropagation();
-            var $blockContainer = UIElements.createModal({
-                id: 'cp-teams-roster-dialog',
-            }).show();
-
-            var makeRow = function (arr, first) {
-                return arr.map(function (val) {
-                    return h(first ? 'th' : 'td', val);
-                });
-            };
-            // Global rights
-            var rows = [];
-            var firstRow = ['', Messages.share_linkView, Messages.share_linkEdit,
-                                Messages.teams_table_admins, Messages.teams_table_owners];
-            rows.push(h('tr', makeRow(firstRow, true)));
-            rows.push(h('tr', makeRow([Messages.team_viewers, 'x', '', '', ''])));
-            rows.push(h('tr', makeRow([Messages.team_members, 'x', 'x', '', ''])));
-            rows.push(h('tr', makeRow([Messages.team_admins, 'x', 'x', 'x', ''])));
-            rows.push(h('tr', makeRow([Messages.team_owner, 'x', 'x', 'x', 'x'])));
-            var t = h('table.cp-teams-generic', rows);
-
-            var content = [
-                h('h4', Messages.teams_table_generic),
-                h('p', Messages.teams_table_genericHint),
-                t
-            ];
-
-            APP.module.execCommand('GET_EDITABLE_FOLDERS', {
-                teamId: APP.team
-            }, function (arr) {
-                console.log(arr);
-                if (!Array.isArray(arr) || !arr.length) {
-                    return void $blockContainer.find('.cp-modal').append(content);
-                }
-                content.push(h('h4', Messages.teams_table_specific));
-                content.push(h('p', Messages.teams_table_specificHint));
-                var paths = arr.map(function (obj) {
-                    obj.path.push(obj.name);
-                    return h('li', obj.path.join('/'));
-                });
-                content.push(h('ul', paths));
-                var rows = [];
-                rows.push(h('tr', makeRow(firstRow, true)));
-                rows.push(h('tr', makeRow([Messages.team_viewers, 'x', 'x', '', ''])));
-                content.push(h('table', rows));
-                $blockContainer.find('.cp-modal').append(content);
-            });
+            makePermissions();
         });
         $header.append(table);
 
@@ -1094,10 +1127,10 @@ define([
                 toolbar.failed();
                 if (!noAlert) { UI.alert(Messages.common_connectionLost, undefined, true); }
             };
-            var onReconnect = function (info) {
+            var onReconnect = function () {
                 setEditable(true);
                 if (APP.team && driveAPP.refresh) { driveAPP.refresh(); }
-                toolbar.reconnecting(info.myId);
+                toolbar.reconnecting();
                 UI.findOKButton().click();
             };
 
@@ -1107,9 +1140,8 @@ define([
             sframeChan.on('EV_NETWORK_DISCONNECT', function () {
                 onDisconnect();
             });
-            sframeChan.on('EV_NETWORK_RECONNECT', function (data) {
-                // data.myId;
-                onReconnect(data);
+            sframeChan.on('EV_NETWORK_RECONNECT', function () {
+                onReconnect();
             });
             common.onLogout(function () { setEditable(false); });
         });

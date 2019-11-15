@@ -534,7 +534,7 @@ define([
         APP.hideDuplicateOwned = Util.find(priv, ['settings', 'drive', 'hideDuplicate']);
         APP.closed = false;
 
-        var $readOnly = $('#cp-app-drive-edition-state');
+        var $readOnly = $(h('div#cp-app-drive-edition-state.cp-app-drive-content-info-box', Messages.readonly));
 
         var updateObject = driveConfig.updateObject;
         var updateSharedFolders = driveConfig.updateSharedFolders;
@@ -1122,6 +1122,10 @@ define([
                 paths.forEach(function (p) {
                     var path = p.path;
                     var $element = p.element;
+
+                    if (APP.$content.data('readOnlyFolder') &&
+                            manager.isSubpath(path, currentPath)) { editable = false; }
+
                     if (!$element.closest("#cp-app-drive-tree").length) {
                         hide.push('expandall');
                         hide.push('collapseall');
@@ -1266,6 +1270,7 @@ define([
             var filtered = [];
             show.forEach(function (className) {
                 var $el = $contextMenu.find('.cp-app-drive-context-' + className);
+                if ((!APP.editable || !editable) && $el.is('.cp-app-drive-context-editable')) { return; }
                 if ((!APP.editable || !editable) && $el.is('.cp-app-drive-context-editable')) { return; }
                 if (filter($el, className)) { return; }
                 $el.parent('li').show();
@@ -1836,7 +1841,9 @@ define([
             var $name = $('<span>', {'class': 'cp-app-drive-element-name'}).text(name);
             $element.append($name);
             $element.append($state);
-            $element.attr('title', name);
+            if (getViewMode() === 'grid') {
+                $element.attr('title', name);
+            }
 
             // display the thumbnail
             // if the thumbnail has already been displayed once, do not reload it, keep the same url
@@ -1876,6 +1883,7 @@ define([
             if (!element || !manager.isFolder(element)) { return; }
             // The element with the class '.name' is underlined when the 'li' is hovered
             var $state = $('<span>', {'class': 'cp-app-drive-element-state'});
+            var $ro;
             if (manager.isSharedFolder(element)) {
                 var data = manager.getSharedFolderData(element);
                 key = data && data.title ? data.title : key;
@@ -1888,9 +1896,16 @@ define([
                     var $password = $passwordIcon.clone().appendTo($state);
                     $password.attr('title', Messages.fm_passwordProtected || '');
                 }
+                if (hrefData.hashData && hrefData.hashData.mode === 'view') {
+                    $ro = $readonlyIcon.clone().appendTo($state);
+                    $ro.attr('title', Messages.readonly);
+                }
 
                 var $shared = $sharedIcon.clone().appendTo($state);
                 $shared.attr('title', Messages.fm_canBeShared);
+            } else if ($content.data('readOnlyFolder') || APP.readOnly) {
+                $ro = $readonlyIcon.clone().appendTo($state);
+                $ro.attr('title', Messages.readonly);
             }
 
             var sf = manager.hasSubfolder(element);
@@ -1902,7 +1917,9 @@ define([
             var $files = $('<span>', {
                 'class': 'cp-app-drive-element-files cp-app-drive-element-list'
             }).text(files);
-            $span.attr('title', key);
+            if (getViewMode() === 'grid') {
+                $span.attr('title', key);
+            }
             $span.append($name).append($state).append($subfolders).append($files);
         };
 
@@ -2152,6 +2169,7 @@ define([
 
 
         var createInfoBox = function (path) {
+            if (APP.readOnly || $content.data('readOnlyFolder')) { return; }
             var $box = $('<div>', {'class': 'cp-app-drive-content-info-box'});
             var msg;
             switch (path[0]) {
@@ -2523,7 +2541,6 @@ define([
 
             // Custom style:
             $block.find('button').addClass('cp-app-drive-toolbar-new');
-            $block.find('button').attr('title', Messages.fm_newButtonTitle);
 
             addNewPadHandlers($block, isInRoot);
 
@@ -2559,6 +2576,10 @@ define([
                     viewHash: ro && roParsed.hash,
                 }
             });
+            // If we're a viewer and this is an old shared folder (no read-only mode), we
+            // can't share the read-only URL and we don't have access to the edit one.
+            // We should hide the share button.
+            if (!modal) { return; }
             modal = UI.dialog.tabs(modal);
             $shareBlock.click(function () {
                 UI.openCustomModal(modal, {
@@ -2826,7 +2847,6 @@ define([
             }).prepend($addIcon.clone()).appendTo($list);
             $element.append($('<span>', {'class': 'cp-app-drive-element-name'})
                 .text(Messages.fm_newFile));
-            $element.attr('title', Messages.fm_newFile);
             $element.click(function () {
                 var $modal = UIElements.createModal({
                     id: 'cp-app-drive-new-ghost-dialog',
@@ -3343,13 +3363,11 @@ define([
             var readOnlyFolder = false;
             if (APP.readOnly) {
                 // Read-only drive (team?)
-                $readOnly.show();
-            } else if (folders[sfId] && folders[sfId].readOnly) {
+                $content.prepend($readOnly.clone());
+            } else if (sfId && folders[sfId] && folders[sfId].readOnly) {
                 // If readonly shared folder...
-                $readOnly.show();
+                $content.prepend($readOnly.clone());
                 readOnlyFolder = true;
-            } else {
-                $readOnly.hide();
             }
             $content.data('readOnlyFolder', readOnlyFolder);
 
@@ -4079,7 +4097,6 @@ define([
                     var roParsed = Hash.parsePadUrl(data.roHref);
                     var padType = parsed.type || roParsed.type;
                     var ro = !sf || (folders[el] && folders[el].version >= 2);
-                    console.log(folders[el]);
                     var padData = {
                         teamId: APP.team,
                         origin: APP.origin,

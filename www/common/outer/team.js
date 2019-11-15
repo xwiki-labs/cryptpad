@@ -57,6 +57,14 @@ define([
                     return false;
                 }
             });
+            proxy.on('disconnect', function () {
+                team.offline = true;
+                team.sendEvent('NETWORK_DISCONNECT');
+            });
+            proxy.on('reconnect', function () {
+                team.offline = false;
+                team.sendEvent('NETWORK_RECONNECT');
+            });
         }
         proxy.on('change', [], function (o, n, p) {
             if (fId) {
@@ -1029,6 +1037,10 @@ define([
             team.userObject.setReadOnly(!secret.keys.secondaryKey, secret.keys.secondaryKey);
         }
 
+        if (!secret.keys.secondaryKey && team.rpc) {
+            team.rpc.destroy();
+        }
+
         // Upgrade the shared folders
         var folders = Util.find(team, ['proxy', 'drive', 'sharedFolders']);
         Object.keys(folders || {}).forEach(function (sfId) {
@@ -1309,6 +1321,9 @@ define([
                 if (safe && ctx.teams[id]) {
                     t[id].secondaryKey = ctx.teams[id].secondaryKey;
                 }
+                if (ctx.teams[id]) {
+                    t[id].hasSecondaryKey = Boolean(ctx.teams[id].secondaryKey);
+                }
             });
             return t;
         };
@@ -1350,6 +1365,10 @@ define([
             removeClient(ctx, clientId);
         };
         team.execCommand = function (clientId, obj, cb) {
+            if (ctx.store.offline) {
+                return void cb({ error: 'OFFLINE' });
+            }
+
             var cmd = obj.cmd;
             var data = obj.data;
             if (cmd === 'SUBSCRIBE') {

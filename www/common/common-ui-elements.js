@@ -929,7 +929,7 @@ define([
             // config.teamId only exists when we're trying to share a pad from a team drive
             // In this case, we don't want to share the pad with the current team
             if (config.teamId && config.teamId === id) { return; }
-            if (!teamsData[id].secondaryKey) { return; }
+            if (!teamsData[id].hasSecondaryKey) { return; }
             var t = teamsData[id];
             teams[t.edPublic] = {
                 notifications: true,
@@ -2302,13 +2302,14 @@ define([
                 prettyUsage = Messages._getKey('formattedMB', [usage]);
                 prettyLimit = Messages._getKey('formattedMB', [limit]);
             }
-
+            
             if (quota < 0.8) { $usage.addClass('cp-limit-usage-normal'); }
             else if (quota < 1) { $usage.addClass('cp-limit-usage-warning'); }
             else { $usage.addClass('cp-limit-usage-above'); }
             var $text = $('<span>', {'class': 'cp-limit-usage-text'});
-            $text.text(usage + ' / ' + prettyLimit);
-            $limit.append($usage).append($text);
+            $text.html(Messages._getKey('storageStatus', [prettyUsage, prettyLimit]));
+            $container.prepend($text);
+            $limit.append($usage);
         };
 
         var updateUsage = Util.notAgainForAnother(function () {
