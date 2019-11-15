@@ -856,7 +856,26 @@ define([
                     s.manager.getPadAttribute(data, waitFor(function (err, val) {
                         if (err) { return; }
                         if (!val || typeof(val) !== "object") { return void console.error("Not an object!"); }
-                        if (!res.value || res.atime < val.atime) {
+                        if (!val.value) { return; }
+
+                        // Update the result if
+                        // 1. we want all attributes and we have a more complete result
+                        // 2. we want all attributes and we have the same result but more recent
+                        // 3. we want 1 attribute and we have a more recent value
+
+                        if (res.value && !data.attr
+                            && Object.keys(val.value).length < Object.keys(res.value).length) {
+                            return;
+                        }
+                        if (res.value && !data.attr
+                                && Object.keys(val.value).length > Object.keys(res.value).length) {
+                            res.atime = val.atime;
+                            res.value = val.value;
+                            return;
+                        }
+
+                        if (!res.value ||
+                                (res.atime < val.atime && typeof(val.value) !== "undefined")) {
                             res.atime = val.atime;
                             res.value = val.value;
                         }

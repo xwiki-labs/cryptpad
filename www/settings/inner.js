@@ -338,6 +338,7 @@ define([
         cb(content);
     }, true);
 
+    /* // XXX
     makeBlock('passwords', function (common, cb) {
         var $ok = $('<span>', {'class': 'fa fa-check', title: Messages.saved}).hide();
         var $spinner = $('<span>', {'class': 'fa fa-spinner fa-pulse'}).hide();
@@ -386,7 +387,7 @@ define([
         ];
         cb(content);
     }, true);
-
+*/
     create['userfeedback'] = function () {
         var $div = $('<div>', { 'class': 'cp-settings-userfeedback cp-sidebarlayout-element'});
 

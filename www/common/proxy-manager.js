@@ -23,6 +23,7 @@ define([
         cfg.rt = lm.realtime;
         cfg.readOnly = Boolean(!editKey);
         // cfg.noPasswords = ; // XXX XXX
+        cfg.noPasswords = true;
         var userObject = UserObject.init(lm.proxy, cfg);
         if (userObject.fixFiles) {
             // Only in outer
@@ -849,12 +850,6 @@ define([
         cb = cb || function () {};
         if (!data.attr || !data.attr.trim()) { return void cb("E_INVAL_ATTR"); }
 
-        var parsed = Hash.parsePadUrl(data.href);
-        var noPasswords = Util.find(Env, ['settings', 'general', 'forgetPasswords']);
-        if (data.attr === 'password' && noPasswords && parsed.type !== 'drive') { // XXX
-            return void cb();
-        }
-
         var sfId = Env.user.userObject.getSFIdFromHref(data.href);
         if (sfId) {
             if (data.attr === "href") {
@@ -866,6 +861,14 @@ define([
         var nt = nThen;
         datas.forEach(function (d) {
             nt = nt(function (waitFor) {
+
+                // Never store passwords in shared folders
+                // Use the settings for the main drive
+                var noPasswords = d.fId || Util.find(Env, ['settings', 'general', 'forgetPasswords']);
+                if (data.attr === 'password' && noPasswords) { // XXX
+                    return;
+                }
+
                 d.userObject.setPadAttribute(data.href, data.attr, data.value, waitFor());
             }).nThen;
         });
@@ -896,11 +899,28 @@ define([
             var atime = d.data.atime;
 
             var value = data.attr ? d.data[data.attr] : JSON.parse(JSON.stringify(d.data));
-            if (!res.value || res.atime < atime) {
+
+            // Update the result if
+            // 1. we want all attributes and we have a more complete result
+            // 2. we want all attributes and we have the same result but more recent
+            // 3. we want 1 attribute and we have a more recent value
+
+            // If we want all the data but some keys were missing in the previous result (password)
+            if (res.value && !data.attr
+                && Object.keys(value).length < Object.keys(res.value).length) { return; }
+            if (res.value && !data.attr
+                    && Object.keys(value).length > Object.keys(res.value).length) {
+                res.atime = atime;
+                res.value = value;
+                return;
+            }
+            // If we had no value or we have a more recent value, update the result
+            if (!res.value || (data.attr && res.atime < atime && typeof(value) !== "undefined")) {
                 res.atime = atime;
                 res.value = value;
             }
         });
+
         setTimeout(function () {
             cb(null, res);
         });

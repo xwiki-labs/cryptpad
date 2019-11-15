@@ -270,7 +270,10 @@ define([
                 unpin: team.unpin,
                 loadSharedFolder: loadSharedFolder,
                 settings: {
-                    drive: Util.find(ctx.store, ['proxy', 'settings', 'drive'])
+                    drive: Util.find(ctx.store, ['proxy', 'settings', 'drive']),
+                    general: {
+                        forgetPasswords: Boolean(Util.find(state, ['metadata', 'forgetPasswords']))
+                    }
                 },
                 Store: ctx.Store
             }, {

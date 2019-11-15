@@ -273,7 +273,7 @@ define([
             Object.keys(data).forEach(function (id) {
                 id = Number(id);
                 // Find and maybe update existing pads with the same channel id
-                var d = data[id];
+                var d = clone(data[id]);
                 // If we were given an edit link, encrypt its value if needed
                 if (d.href) { d.href = exp.cryptor.encrypt(d.href); }
                 var found = false;
@@ -291,6 +291,8 @@ define([
                     toRemove.push(id);
                     return;
                 }
+                // Remove the password if needed // XXX
+                if (config.noPasswords) { delete d.password; }
                 files[FILES_DATA][id] = d;
             });
 

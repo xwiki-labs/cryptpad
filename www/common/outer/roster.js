@@ -304,6 +304,7 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto) {
             metadata.topic = metadata.topic || '';
             metadata.name = metadata.name || '';
             metadata.avatar = metadata.avatar || '';
+            metadata.forgetPasswords = metadata.forgetPasswords || '';
 
             roster.internal.initialized = true;
             return true;

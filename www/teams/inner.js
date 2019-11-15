@@ -157,6 +157,7 @@ define([
             'cp-team-edpublic',
             'cp-team-name',
             'cp-team-avatar',
+            'cp-team-store-passwords',
             'cp-team-delete',
         ],
     };
@@ -976,6 +977,53 @@ define([
             ];
             cb(content);
         });
+    }, true);
+
+    makeBlock('store-passwords', function (common, cb) {
+        var $ok = $('<span>', {'class': 'fa fa-check', title: Messages.saved}).hide();
+        var $spinner = $('<span>', {'class': 'fa fa-spinner fa-pulse'}).hide();
+
+        var $cbox = $(UI.createCheckbox('cp-teams-store-passwords',
+                                   Messages.settings_storePasswordsBox,
+                                   true, { label: {class: 'noTitle'} }));
+
+        var $checkbox = $cbox.find('input').on('change', function () {
+            $spinner.show();
+            $ok.hide();
+            var val = !($checkbox.is(':checked') || false);
+            APP.module.execCommand('GET_TEAM_METADATA', {
+                teamId: APP.team
+            }, function (obj) {
+                if (obj && obj.error) { return void UI.warn(Messages.error); }
+                obj.forgetPasswords = val ? String(val) : '';
+                APP.module.execCommand('SET_TEAM_METADATA', {
+                    teamId: APP.team,
+                    metadata: obj
+                }, function () {
+                    $spinner.hide();
+                    $ok.show();
+                });
+            });
+        });
+
+        APP.module.execCommand('GET_TEAM_METADATA', {
+            teamId: APP.team
+        }, function (obj) {
+            if (obj && obj.error) {
+                return void UI.warn(Messages.error);
+            }
+            var val = obj.forgetPasswords;
+            if (val) { $checkbox[0].checked = false; }
+
+            // Display existing + button
+            var content = [
+                $cbox[0],
+                $ok[0],
+                $spinner[0]
+            ];
+            cb(content);
+        });
+
     }, true);
 
     makeBlock('delete', function (common, cb) {
