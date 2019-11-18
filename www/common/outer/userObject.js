@@ -71,9 +71,10 @@ define([
             cb(null, clone(data[attr]));
         };
 
-        exp.pushData = function (_data, cb) {
+        exp.pushData = function (_data, cb, opts) {
             if (typeof cb !== "function") { cb = function () {}; }
             if (readOnly) { return void cb('EFORBIDDEN'); }
+            opts = opts || {};
             var id = Util.createRandomInteger();
             var data = clone(_data);
 
@@ -81,7 +82,11 @@ define([
             if (data.href && data.href.indexOf('#') !== -1) { data.href = exp.cryptor.encrypt(data.href); }
 
             // Remove the password if needed // XXX
-            if (config.noPasswords) { delete data.password; }
+            if (config.noPasswords && !opts.storePassword) { delete data.password; }
+            // If the checkbox was unchecked manually, don't store the password
+            if (typeof (opts.storePassword) === "boolean" && !opts.storePassword) {
+                delete data.password;
+            }
 
             files[FILES_DATA][id] = data;
             cb(null, id);
@@ -170,7 +175,6 @@ define([
                         if (fd.rtChannel) {
                             removeOwnedChannel(fd.rtChannel, function () {});
                         }
-                        // XXX fd.lastVersion to delete the encrypted cp?
                     }
                     if (fd.lastVersion) { toClean.push(Hash.hrefToHexChannelId(fd.lastVersion)); }
                     if (fd.rtChannel) { toClean.push(fd.rtChannel); }

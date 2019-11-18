@@ -392,13 +392,15 @@ define([
         postMessage("SET_DISPLAY_NAME", value, cb);
     };
 
-    common.setPadAttribute = function (attr, value, cb, href) {
+    common.setPadAttribute = function (attr, value, cb, href, opts) {
+        opts = opts || {};
         cb = cb || function () {};
         href = Hash.getRelativeHref(href || window.location.href);
         postMessage("SET_PAD_ATTRIBUTE", {
             href: href,
             attr: attr,
-            value: value
+            value: value,
+            storePassword: opts.storePassword
         }, function (obj) {
             if (obj && obj.error) { return void cb(obj.error); }
             cb();

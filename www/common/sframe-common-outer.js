@@ -28,9 +28,8 @@ define([
         var AppConfig;
         var Test;
         var password;
+        var storePassword;
         var initialPathInDrive;
-        var noPassword = localStorage.CryptPad_dev === "1";
-        noPassword = false; // XXX
         nThen(function (waitFor) {
             // Load #2, the loading screen is up so grab whatever you need...
             require([
@@ -207,13 +206,14 @@ define([
                 //        2c: 'view' pad and '/p/' and a wrong password stored --> the seed is incorrect
                 //        2d: 'view' pad and '/p/' and password never stored (security feature) --> password-prompt
 
-                var askPassword = function (wrongPasswordStored) {
+                var askPassword = function (wrongPasswordStored, cfg) {
                     // Ask for the password and check if the pad exists
                     // If the pad doesn't exist, it means the password isn't correct
                     // or the pad has been deleted
                     var correctPassword = waitFor();
                     sframeChan.on('Q_PAD_PASSWORD_VALUE', function (data, cb) {
-                        password = data;
+                        password = data.value;
+                        storePassword = !data.noStore;
                         var next = function (e, isNew) {
                             if (Boolean(isNew)) {
                                 // Ask again in the inner iframe
@@ -231,8 +231,9 @@ define([
                                             var roHref = window.location.pathname + '#' + Utils.Hash.getViewHashFromKeys(secret);
                                             Cryptpad.setPadAttribute('roHref', roHref, w(), parsed.getUrl());
                                         }
-                                        if (noPassword) { return; } // XXX no password
-                                        Cryptpad.setPadAttribute('password', password, w(), parsed.getUrl());
+                                        Cryptpad.setPadAttribute('password', password, w(), parsed.getUrl(), {
+                                            storePassword: storePassword
+                                        });
                                     }).nThen(correctPassword);
                                 } else {
                                     correctPassword();
@@ -251,11 +252,15 @@ define([
                         // Not a file, so we can use `isNewChannel`
                         Cryptpad.isNewChannel(window.location.href, password, next);
                     });
-                    sframeChan.event("EV_PAD_PASSWORD");
+                    sframeChan.event("EV_PAD_PASSWORD", cfg);
                 };
 
                 var done = waitFor();
                 var stored = false;
+                var passwordCfg = {
+                    value: '',
+                    noStore: false
+                };
                 nThen(function (w) {
                     Cryptpad.getPadAttribute('title', w(function (err, data) {
                         stored = (!err && typeof (data) === "string");
@@ -263,9 +268,12 @@ define([
                     Cryptpad.getPadAttribute('password', w(function (err, val) {
                         password = val;
                     }), parsed.getUrl());
+                    Cryptpad.getAttribute(['general', 'forgetPasswords'], w(function (err, val) {
+                        storePassword = passwordCfg.noStore = Boolean(val);
+                    }));
                 }).nThen(function (w) {
                     if (!password && !stored && sessionStorage.newPadPassword) {
-                        password = sessionStorage.newPadPassword;
+                        passwordCfg.value = sessionStorage.newPadPassword;
                         delete sessionStorage.newPadPassword;
                     }
 
@@ -275,7 +283,7 @@ define([
                         Cryptpad.getFileSize(window.location.href, password, w(function (e, size) {
                             if (size !== 0) { return void todo(); }
                             // Wrong password or deleted file?
-                            askPassword(true);
+                            askPassword(true, passwordCfg);
                         }));
                         return;
                     }
@@ -294,7 +302,7 @@ define([
                             return void todo();
                         }
                         // Wrong password or deleted file?
-                        askPassword(true);
+                        askPassword(true, passwordCfg);
                     }));
                 }).nThen(done);
             }
@@ -506,7 +514,8 @@ define([
                 currentTitle = newTitle;
                 setDocumentTitle();
                 var data = {
-                    password: noPassword ? null : password,
+                    storePassword: storePassword,
+                    password: password,
                     title: newTitle,
                     channel: secret.channel,
                     path: initialPathInDrive // Where to store the pad if we don't have it in our drive
@@ -529,7 +538,8 @@ define([
             });
             sframeChan.on('Q_AUTOSTORE_STORE', function (obj, cb) {
                 var data = {
-                    password: noPassword ? null : password,
+                    storePassword: storePassword,
+                    password: password,
                     title: currentTitle,
                     channel: secret.channel,
                     path: initialPathInDrive, // Where to store the pad if we don't have it in our drive
@@ -553,7 +563,7 @@ define([
                     Cryptpad.addSharedFolder(null, secret, cb);
                 } else {
                     var _data = {
-                        password: noPassword ? null : data.password,
+                        password: data.password,
                         href: data.href,
                         channel: data.channel,
                         title: data.title,
@@ -1275,6 +1285,7 @@ define([
                 var newHash = Utils.Hash.createRandomHash(parsed.type, password);
                 secret = Utils.secret = Utils.Hash.getSecrets(parsed.type, newHash, password);
                 Utils.crypto = Utils.Crypto.createEncryptor(Utils.secret.keys);
+                storePassword = data.storePassword;
 
                 // Update the hash in the address bar
                 var ohc = window.onhashchange;

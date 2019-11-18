@@ -3163,6 +3163,8 @@ define([
             ]),
             //createHelper('#', "TODO: password protection adds another layer of security ........") // TODO
         ]);
+        var noStore = Util.find(privateData, ['settings', 'general', 'forgetPasswords']);
+        var remember = UI.createCheckbox('cp-creation-password-remember', Messages.password_remember, !noStore);
 
         var right = h('span.fa.fa-chevron-right.cp-creation-template-more');
         var left = h('span.fa.fa-chevron-left.cp-creation-template-more');
@@ -3191,6 +3193,7 @@ define([
             owned,
             expire,
             password,
+            remember,
             settings,
             templates,
             createDiv
@@ -3390,6 +3393,7 @@ define([
             // Password
             var passwordVal = $('#cp-creation-password').is(':checked') ?
                                 $('#cp-creation-password-val').val() : undefined;
+            var storePassword = $('#cp-creation-password-remember').is(':checked');
 
             var $template = $creation.find('.cp-creation-template-selected');
             var templateId = $template.data('id') || undefined;
@@ -3403,6 +3407,7 @@ define([
             return {
                 owned: ownedVal,
                 password: passwordVal,
+                storePassword: storePassword,
                 expire: expireVal,
                 templateId: templateId,
                 team: team
@@ -3477,19 +3482,29 @@ define([
         (cb || function () {})();
     };
 
-    UIElements.displayPasswordPrompt = function (common, isError) {
+    UIElements.displayPasswordPrompt = function (common, cfg, isError) {
+        cfg = cfg || {};
         var error;
         if (isError) { error = setHTML(h('p.cp-password-error'), Messages.password_error); }
         var info = h('p.cp-password-info', Messages.password_info);
         var password = UI.passwordInput({placeholder: Messages.password_placeholder});
         var button = h('button', Messages.password_submit);
+        var remember = UI.createCheckbox('cp-password-remember', Messages.password_remember, !cfg.noStore);
+
+        if (cfg.value && !isError) {
+            $(password).find('.cp-password-input').val(cfg.value);
+        }
 
         var submit = function () {
             var value = $(password).find('.cp-password-input').val();
+            var noStore = cfg.noStore = !$(remember).find('input').is(':checked');
             UI.addLoadingScreen();
-            common.getSframeChannel().query('Q_PAD_PASSWORD_VALUE', value, function (err, data) {
+            common.getSframeChannel().query('Q_PAD_PASSWORD_VALUE', {
+                value: value,
+                noStore: noStore
+            }, function (err, data) {
                 if (!data) {
-                    UIElements.displayPasswordPrompt(common, true);
+                    UIElements.displayPasswordPrompt(common, cfg, true);
                 }
             });
         };
@@ -3503,7 +3518,8 @@ define([
             h('p.cp-password-form', [
                 password,
                 button
-            ])
+            ]),
+            remember
         ]);
         UI.errorLoadingScreen(block);
 

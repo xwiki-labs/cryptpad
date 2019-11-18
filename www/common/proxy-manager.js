@@ -22,7 +22,7 @@ define([
         cfg.editKey = editKey;
         cfg.rt = lm.realtime;
         cfg.readOnly = Boolean(!editKey);
-        // cfg.noPasswords = ; // XXX XXX
+        // XXX This is a shared folder, we won't store any password
         cfg.noPasswords = true;
         var userObject = UserObject.init(lm.proxy, cfg);
         if (userObject.fixFiles) {
@@ -865,6 +865,9 @@ define([
                 // Never store passwords in shared folders
                 // Use the settings for the main drive
                 var noPasswords = d.fId || Util.find(Env, ['settings', 'general', 'forgetPasswords']);
+                if (typeof (data.storePassword) === "boolean") {
+                    noPasswords = !data.storePassword;
+                }
                 if (data.attr === 'password' && noPasswords) { // XXX
                     return;
                 }
@@ -1046,7 +1049,7 @@ define([
         return result;
     };
 
-    var addPad = function (Env, path, pad, cb) {
+    var addPad = function (Env, path, pad, cb, opts) {
         var uo = Env.user.userObject;
         var p = ['root'];
         if (path) {
@@ -1060,7 +1063,7 @@ define([
                 uo.pushData(pad, waitFor(function (e, id) {
                     if (e) { error = e; return; }
                     uo.add(id, p);
-                }));
+                }), opts);
                 if (uo.id && _ownedByMe(Env, pad.owners)) {
                     // Creating an owned pad in a shared folder:
                     // We must add a copy in the user's personnal drive

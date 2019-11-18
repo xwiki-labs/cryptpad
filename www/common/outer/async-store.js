@@ -622,6 +622,8 @@ define([
                     }, clientId);
                 });
                 onSync(data.teamId, cb);
+            }, {
+                storePassword: data.storePassword
             });
         };
 
@@ -1143,6 +1145,7 @@ define([
                         owners: owners,
                         expire: expire,
                         password: data.password,
+                        storePassword: data.storePassword,
                         path: data.path
                     }, cb);
                     // Let inner know that dropped files shouldn't trigger the popup

@@ -303,14 +303,7 @@ define([
         }
     };
     funcs.createPad = function (cfg, cb) {
-        ctx.sframeChan.query("Q_CREATE_PAD", {
-            owned: cfg.owned,
-            expire: cfg.expire,
-            password: cfg.password,
-            team: cfg.team,
-            template: cfg.template,
-            templateId: cfg.templateId
-        }, cb);
+        ctx.sframeChan.query("Q_CREATE_PAD", cfg, cb);
     };
 
     funcs.isPadStored = function (cb) {
@@ -595,8 +588,8 @@ define([
 
             UI.addTooltips();
 
-            ctx.sframeChan.on("EV_PAD_PASSWORD", function () {
-                UIElements.displayPasswordPrompt(funcs);
+            ctx.sframeChan.on("EV_PAD_PASSWORD", function (cfg) {
+                UIElements.displayPasswordPrompt(funcs, cfg);
             });
 
             ctx.sframeChan.on("EV_PAD_PASSWORD_ERROR", function () {
