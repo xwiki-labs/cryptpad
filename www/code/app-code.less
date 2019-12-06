@@ -125,6 +125,49 @@
 
         .markdown_preformatted-code;
         .markdown_gfm-table(black);
+
+
+        blockquote p {
+            margin: 15px !important;
+        }
+        div #cp-app-code-preview-content {
+            max-width: 100vw !important;
+            max-width: 100%;
+        }
+        pre.mermaid {
+            _border: 2px solid black;  
+            background: #eee;
+            svg {
+                .node {
+                    rect {
+                        &[rx="0"] {
+                            _fill: red;
+                            stroke: black;
+
+                            ~ g div{
+                                _font-weight: bold;
+                            }
+                        }
+                    }
+                    polygon {
+                        &[points^="-"] {
+                            fill: white;
+                            stroke: black;
+                        }
+                        &[points^="57"] {
+                            fill: #FF0073;
+                        }
+                    }
+                    circle {
+                        fill: blue;
+                        ~ g div{
+                            color: white;
+                            font-weight: bold;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     .cp-splitter {
