@@ -183,7 +183,8 @@ define([
         if (p === '[TOC]') {
             return '<p><div class="cp-md-toc"></div></p>';
         }
-        return renderParagraph(p);
+        return '<p>' + p + '</p>';
+        //return renderParagraph(p);
     };
     restrictedRenderer.paragraph = function (p) {
         return renderParagraph(p);
