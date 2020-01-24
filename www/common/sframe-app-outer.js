@@ -35,6 +35,9 @@ define([
         };
         window.addEventListener('message', onMsg);
     }).nThen(function (/*waitFor*/) {
+        try {
+            Object.keys(window.requirejs.s.contexts._.defined); // XXX preload optimization
+        } catch (err) { }
         SFCommonO.start({
             useCreationScreen: true,
             messaging: true

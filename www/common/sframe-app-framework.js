@@ -701,6 +701,9 @@ define([
             toolbar.$drawer.append($properties);
 
             createFilePicker();
+            try {
+                console.info(Object.keys(window.requirejs.s.contexts._.defined)); // XXX preload optimization
+            } catch (err) {}
 
             cb(Object.freeze({
                 // Register an event to be informed of a content update coming from remote
