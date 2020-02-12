@@ -1573,6 +1573,10 @@ define([
                                 msg: CpNetflux.removeCp(msg),
                                 validateKey: channel.data.validateKey
                             }, cId);
+                            if (store.data.devMode) {
+                                setTimeout(cb, 10000);
+                                return;
+                            }
                             cb();
                         });
                     };

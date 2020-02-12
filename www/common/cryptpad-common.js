@@ -1901,6 +1901,7 @@ define([
                 anonHash: LocalStore.getFSHash(),
                 localToken: tryParsing(localStorage.getItem(Constants.tokenKey)), // TODO move this to LocalStore ?
                 language: common.getLanguage(),
+                devMode: localStorage.CryptPad_dev === "1",
                 driveEvents: true //rdyCfg.driveEvents // Boolean
             };
             // if a pad is created from a file
