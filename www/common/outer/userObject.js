@@ -1,11 +1,6 @@
-define([
-    '/customize/application_config.js',
-    '/common/common-util.js',
-    '/common/common-hash.js',
-    '/common/common-realtime.js',
-    '/common/common-feedback.js',
-    '/customize/messages.js'
-], function (AppConfig, Util, Hash, Realtime, Feedback, Messages) {
+(function () {
+    'use strict';
+var factory = function (Util, Hash, Realtime, Feedback, Messages) {
     var module = {};
 
     var clone = function (o) {
@@ -939,4 +934,36 @@ define([
     };
 
     return module;
-});
+};
+
+    if (typeof(module) !== 'undefined' && module.exports) {
+        var Feedback = {
+            send: function () {}
+        };
+        var Realtime = {
+            whenRealtimeSyncs: function (chainpad, cb) {
+                chainpad.onSettle(cb);
+            }
+        };
+        module.exports = factory(
+            require('../common-util.js'),
+            require('../common-hash.js'),
+            Realtime,
+            Feedback,
+            {}
+        );
+    } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+        define([
+            '/common/common-util.js',
+            '/common/common-hash.js',
+            '/common/common-realtime.js',
+            '/common/common-feedback.js',
+            '/customize/messages.js'
+        ], function (Util, Hash, Realtime, Feedback, Messages) {
+            return factory(Util, Hash, Realtime, Feedback, Messages);
+        });
+    } else {
+        // Not supported
+    }
+}());
+

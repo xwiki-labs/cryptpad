@@ -1,12 +1,5 @@
-define([
-    '/customize/application_config.js',
-    '/common/common-util.js',
-    '/common/common-hash.js',
-    '/common/common-constants.js',
-    '/common/outer/userObject.js',
-    '/customize/messages.js',
-    '/bower_components/chainpad-crypto/crypto.js',
-], function (AppConfig, Util, Hash, Constants, OuterFO, Messages, Crypto) {
+(function () {
+var factory = function (Util, Hash, Constants, OuterFO, Messages, Crypto) {
     var module = {};
 
     var ROOT = module.ROOT = "root";
@@ -919,4 +912,34 @@ define([
         return exp;
     };
     return module;
-});
+};
+
+    if (typeof(module) !== 'undefined' && module.exports) {
+        var C = {
+            storageKey: 'filesData',
+            oldStorageKey: 'CryptPad_RECENTPADS'
+        };
+        module.exports = factory(
+            require('./common-util.js'),
+            require('./common-hash.js'),
+            C,
+            require('./outer/userObject.js'),
+            {},
+            require('../bower_components/chainpad-crypto/crypto.js')
+        );
+    } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+        define([
+            '/common/common-util.js',
+            '/common/common-hash.js',
+            '/common/common-constants.js',
+            '/common/outer/userObject.js',
+            '/customize/messages.js',
+            '/bower_components/chainpad-crypto/crypto.js',
+        ], function (Util, Hash, Constants, OuterFO, Messages, Crypto) {
+            return factory(Util, Hash, Constants, OuterFO, Messages, Crypto);
+        });
+    } else {
+        // Not supported
+    }
+}());
+

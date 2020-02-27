@@ -1,7 +1,5 @@
-define([
-    '/common/cryptpad-common.js',
-    '/common/userObject.js',
-],function (Cryptpad, FO) {
+(function () {
+var factory = function (FO) {
     var module = {};
 
     var href1 = "/pad/#/1/edit/a798u+miu2tg5b-QaP9SvA/UIPoGUPewZscBUFhNIi+eBBM/";
@@ -415,4 +413,18 @@ define([
     };
 
     return module;
-});
+};
+
+    if (typeof(module) !== 'undefined' && module.exports) {
+        module.exports = factory(require('../common/userObject.js'));
+    } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+        define([
+            '/common/userObject.js',
+        ], function (FO) {
+            return factory(FO);
+        });
+    } else {
+        // Not supported
+    }
+}());
+
