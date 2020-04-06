@@ -303,7 +303,7 @@ define([
             });
         });
 
-        var called = false;
+        var called = false; // XXX notAgainUntilComplete
         redrawAll = function (reload) {
             if (called) { return; }
             called = true;

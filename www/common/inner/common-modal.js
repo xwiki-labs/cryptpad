@@ -88,7 +88,7 @@ define([
         return owned;
     };
 
-    var blocked = false;
+    var blocked = false; // XXX notAgainUntilComplete
     Modal.getModal = function (common, opts, _tabs, cb) {
         if (blocked) { return; }
         blocked = true;
