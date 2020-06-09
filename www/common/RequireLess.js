@@ -2,6 +2,7 @@ define([
     '/common/LessLoader.js'
 ], function (LessLoader) {
     var api = {};
+
     api.normalize = function(name, normalize) {
         return normalize(name);
     };

@@ -5,8 +5,9 @@ const require = define;
 */
 define([
     '/api/config',
+    '/common/common-util.js',
     '/bower_components/nthen/index.js'
-], function (Config, nThen) { /*::});module.exports = (function() {
+], function (Config, Util, nThen) { /*::});module.exports = (function() {
     const Config = (undefined:any);
     const nThen = (undefined:any);
     */
@@ -95,9 +96,54 @@ define([
 
     var lessEngine;
     var tempCache = { key: Math.random() };
+
+    var makeWorker = function () {
+        var urlArgs = Util.find(Config, ['requireConf', 'urlArgs']) || '';
+        var worker = new Worker('/common/LessWorker.js?' + urlArgs);
+
+        var response = Util.response(function (label, info) {
+            console.error("Less worker error", label, info);
+        });
+
+        worker.onerror = function (err) { console.error(err); };
+        worker.onmessage = function (evt) {
+            try {
+                var parsed = JSON.parse(evt.data);
+                if (response.expected(parsed.txid)) {
+                    if (parsed.error) {
+                        response.clear(parsed.txid);
+                    } else {
+                        response.handle(parsed.css);
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            };
+        };
+        var postMsg = function (data) {
+            worker.postMessage(JSON.stringify(data));
+        };
+
+        lessEngine = {
+            render: function (less, opts, cb) {
+                var txid = Util.uid();
+                response.expect(txid, function (css) {
+                    cb(void 0, css);
+                });
+                postMsg({
+                    txid: txid,
+                    less: less
+                });
+            }
+        };
+        return lessEngine;
+    };
+
     var getLessEngine = function (cb) {
         if (lessEngine) {
             cb(lessEngine);
+        } else if (typeof(Worker) !== "undefined") {
+            cb(makeWorker());
         } else {
             require(['/common/less.min.js'], function (Less) {
                 if (lessEngine) { return void cb(lessEngine); }
