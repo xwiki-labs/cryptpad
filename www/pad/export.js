@@ -3,10 +3,11 @@ define([
     '/common/common-util.js',
     '/bower_components/hyperjson/hyperjson.js',
     '/bower_components/nthen/index.js',
-], function ($, Util, Hyperjson, nThen) {
+    '/bower_components/html2pdf.js/dist/html2pdf.bundle.min.js',
+], function ($, Util, Hyperjson, nThen, PDF) {
     var module = {
         ext: '.html', // default
-        exts: ['.html', '.doc']
+        exts: ['.html', '.pdf', '.doc']
     };
 
     var exportMediaTags = function (inner, cb) {
@@ -76,6 +77,15 @@ define([
                     type: 'application/msword'
                 });
                 return void cb(blob);
+            }
+            if (ext === ".pdf") {
+                PDF(inner, {
+                    margin: 20,
+                    pagebreak: {mode: 'avoid-all'},
+                    //html2canvas: {scale:1.5},
+                    //image: {type: 'png'}
+                });
+                return;
             }
             var html = module.getHTML(toExport);
             cb(new Blob([ html ], { type: "text/html;charset=utf-8" }));
