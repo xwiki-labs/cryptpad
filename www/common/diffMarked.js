@@ -64,6 +64,21 @@ define([
         }
     };
 
+    var Plotly = {
+        __stubbed: true,
+        init: function () {
+            require([
+                '/lib/plotly-latest.min.js.'
+            ], function (_Plotly) {
+                console.debug("loaded plotly");
+                if (Plotly.__stubbed) {
+                    Plotly = _Plotly;
+                }
+                pluginLoaded.fire();
+            });
+        }
+    };
+
     var drawMarkmap;
     var MarkMapTransform;
     var Markmap;
@@ -436,6 +451,18 @@ define([
         attr: 'markmap-source',
         render:  function ($el) {
             drawMarkmap($el);
+        }
+    };
+
+    plugins.plotly = {
+        name: 'plotly',
+        attr: 'plotly-source',
+        render:  function ($el) {
+            var data = [];
+            try {
+            data = JSON.parse($el[0].getAttribute("plotly-source"));
+            } catch (e) { console.error(e); }
+            Plotly.newPlot($el[0], data);
         }
     };
 
