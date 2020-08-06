@@ -66,14 +66,14 @@ define([
 
     var Plotly = {
         __stubbed: true,
-        init: function () {
+        newPlot: function (div, data) {
             require([
-                '/lib/plotly-latest.min.js.'
+                '/lib/plotly-latest.min.js'
             ], function (_Plotly) {
-                console.debug("loaded plotly");
                 if (Plotly.__stubbed) {
                     Plotly = _Plotly;
                 }
+                Plotly.newPlot(div, data);
                 pluginLoaded.fire();
             });
         }
@@ -213,6 +213,8 @@ define([
             return '<pre class="markmap" data-plugin="markmap">'+Util.fixHTML(code)+'</pre>';
         } else if (language === 'mathjax') {
             return '<pre class="mathjax" data-plugin="mathjax">'+Util.fixHTML(code)+'</pre>';
+        } else if (language === 'plotly') {
+            return '<pre class="plotly" data-plugin="plotly">'+Util.fixHTML(code)+'</pre>';
         } else {
             return defaultCode.apply(renderer, arguments);
         }
@@ -462,6 +464,7 @@ define([
             try {
             data = JSON.parse($el[0].getAttribute("plotly-source"));
             } catch (e) { console.error(e); }
+            $el.html('');
             Plotly.newPlot($el[0], data);
         }
     };
