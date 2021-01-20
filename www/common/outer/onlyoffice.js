@@ -8,9 +8,10 @@ define([
         var chan = ctx.channels[c.channel];
         if (!chan) { return void cb({error: 'ENOCHAN'}); }
         cb();
-        chan.history.forEach(function (msg) {
+        chan.history.forEach(function (obj) {
             ctx.emit('MESSAGE', {
-                msg: msg,
+                msg: obj.msg,
+                offset: obj.offset,
                 validateKey: chan.validateKey
             }, [client]);
         });
@@ -76,10 +77,19 @@ define([
             });
             wc.on('leave', function () {
             });
-            wc.on('message', function (msg) {
-                chan.history.push(msg);
+            wc.on('message', function (msg, sender, opts) {
+                var hash = msg.slice(0,64);
+                chan.lastKnownHash = hash;
+                opts = opts || {};
+                chan.lkhOffset = opts.offset;
+
+                chan.history.push({
+                    msg: msg,
+                    offset: opts.offset
+                });
                 ctx.emit('MESSAGE', {
                     msg: msg,
+                    offset: opts.offset,
                     validateKey: chan.validateKey
                 }, chan.clients);
             });
@@ -87,9 +97,13 @@ define([
             chan.wc = wc;
             chan.sendMsg = function (msg, cb) {
                 cb = cb || function () {};
-                wc.bcast(msg).then(function () {
-                    chan.history.push(msg);
-                    cb();
+                wc.bcast(msg).then(function (obj) {
+                    var offset = obj && obj.offset;
+                    chan.history.push({
+                        msg: msg,
+                        offset: offset
+                    });
+                    cb({offset: offset});
                 }, function (err) {
                     cb({error: err});
                 });
@@ -106,6 +120,7 @@ define([
             var cfg = {
                 txid: txid,
                 lastKnownHash: chan.lastKnownHash || chan.lastCpHash,
+                lkhOffset: chan.lkhOffset || chan.lastCpOffset,
                 metadata: {
                     validateKey: obj.validateKey,
                     owners: obj.owners,
@@ -123,7 +138,7 @@ define([
 
         };
 
-        network.on('message', function (msg, sender) {
+        network.on('message', function (msg, sender, opts) {
             if (!ctx.channels[channel]) { return; }
             var hk = network.historyKeeper;
             if (sender !== hk) { return; }
@@ -168,10 +183,17 @@ define([
             if (hash === chan.lastKnownHash || hash === chan.lastCpHash) { return; }
 
             chan.lastKnownHash = hash;
+            opts = opts || {};
+            chan.lkhOffset = opts.offset;
             ctx.emit('MESSAGE', {
                 msg: msg,
+                offset: opts.offset,
+                validateKey: chan.validateKey
             }, chan.clients);
-            chan.history.push(msg);
+            chan.history.push({
+                msg: msg,
+                offset: opts.offset
+            });
         });
 
         network.join(channel).then(onOpen, function (err) {
@@ -193,8 +215,8 @@ define([
         if (!chan) { return void cb({ error: 'INVALID_CHANNEL' }); }
         var hash = data;
         var index = -1;
-        chan.history.some(function (msg, idx) {
-            if (msg.slice(0,64) === hash) {
+        chan.history.some(function (obj, idx) {
+            if (obj.msg.slice(0,64) === hash) {
                 index = idx + 1;
                 return true;
             }

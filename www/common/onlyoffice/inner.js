@@ -272,9 +272,9 @@ define([
                         msg: msg,
                         isCp: cp
                     }
-                }, function (err, h) {
+                }, function (err, obj) {
                     if (!err) { evOnSync.fire(); }
-                    cb(err, h);
+                    cb(err, obj.hash, obj.offset);
                 });
             },
         };
@@ -348,6 +348,7 @@ define([
             content.hashes[i] = {
                 file: data.url,
                 hash: ev.hash,
+                offset: ev.offset,
                 index: ev.index
             };
             oldHashes = JSON.parse(JSON.stringify(content.hashes));
@@ -389,6 +390,7 @@ define([
             onUploaded: function (ev, data) {
                 if (!data || !data.url) { return; }
                 data.hash = ev.hash;
+                data.offset = ev.offset;
                 sframeChan.query('Q_OO_SAVE', data, function (err) {
                     onUploaded(ev, data, err);
                 });
@@ -436,6 +438,7 @@ define([
             blob.name = (metadataMgr.getMetadataLazy().title || file.doc) + '.' + file.type;
             var data = {
                 hash: (APP.history || APP.template) ? ooChannel.historyLastHash : ooChannel.lastHash,
+                offset: (APP.history || APP.template) ? ooChannel.historyLastOffset : ooChannel.lastOffset,
                 index: (APP.history || APP.template) ? ooChannel.currentIndex : ooChannel.cpIndex
             };
             fixSheets();
@@ -509,6 +512,7 @@ define([
             APP.realtime.onSettle(function () {
                 onUploaded({
                     hash: ooChannel.lastHash,
+                    offset: ooChannel.lastOffset,
                     index: ooChannel.cpIndex
                 }, {
                     url: getLastCp().file,
@@ -556,6 +560,7 @@ define([
             }
             ooChannel.cpIndex = lastCp.index || 0;
             ooChannel.lastHash = lastCp.hash;
+            ooChannel.lastOffset = lastCp.offset;
             var parsed = Hash.parsePadUrl(lastCp.file);
             var secret = Hash.getSecrets('file', parsed.hash);
             if (!secret || !secret.channel) { return; }
@@ -716,7 +721,8 @@ define([
             }
             sframeChan.query('Q_OO_OPENCHANNEL', {
                 channel: content.channel,
-                lastCpHash: getLastCp().hash
+                lastCpHash: getLastCp().hash,
+                lastCpOffset: getLastCp().offset
             }, function (err, obj) {
                 if (err || (obj && obj.error)) { console.error(err || (obj && obj.error)); }
             });
@@ -731,6 +737,7 @@ define([
                     case 'MESSAGE':
                         if (APP.history) {
                             ooChannel.historyLastHash = obj.data.hash;
+                            ooChannel.historyLastOffset = obj.data.offset;
                             ooChannel.currentIndex++;
                             return;
                         }
@@ -749,6 +756,7 @@ define([
                             }*/
                             ooChannel.send(obj.data.msg);
                             ooChannel.lastHash = obj.data.hash;
+                            ooChannel.lastOffset = obj.data.offset;
                             ooChannel.cpIndex++;
                         } else {
                             ooChannel.queue.push(obj.data);
@@ -895,7 +903,10 @@ define([
 
                 ooChannel.cpIndex += ooChannel.queue.length;
                 var last = ooChannel.queue.pop();
-                if (last) { ooChannel.lastHash = last.hash; }
+                if (last) {
+                    ooChannel.lastHash = last.hash;
+                    ooChannel.lastOffset = last.offset;
+                }
             } else {
                 setEditable(false, true);
             }
@@ -1049,7 +1060,8 @@ define([
                 changesIndex: ooChannel.cpIndex || 0,
                 locks: [content.locks[getId()]],
                 excelAdditionalInfo: null
-            }, null, function (err, hash) {
+            }, null, function (err, hash, offset) {
+                console.warn(hash, offset); // XXX OFFSET LOG
                 if (err) {
                     return void console.error(err);
                 }
@@ -1070,6 +1082,7 @@ define([
                 // Increment index and update latest hash
                 ooChannel.cpIndex++;
                 ooChannel.lastHash = hash;
+                ooChannel.lastOffset = offset;
                 // Check if a checkpoint is needed
                 makeCheckpoint();
                 // Remove my lock
@@ -1266,7 +1279,10 @@ define([
                             });
                             ooChannel.cpIndex += ooChannel.queue.length;
                             var last = ooChannel.queue.pop();
-                            if (last) { ooChannel.lastHash = last.hash; }
+                            if (last) {
+                                ooChannel.lastHash = last.hash;
+                                ooChannel.lastOffset = last.offset;
+                            }
 
                             var onDocUnlock = function () {
                                 // Migration required but read-only: continue...
@@ -1339,7 +1355,8 @@ define([
                         if (cp && cp.file && cp.hash) {
                             var channels = [{
                                 channel: content.channel,
-                                lastKnownHash: cp.hash
+                                lastKnownHash: cp.hash,
+                                lkhOffset: cp.offset
                             }];
                             common.checkTrimHistory(channels);
                         }
@@ -1875,6 +1892,7 @@ define([
             };
             var data = {
                 hash: ooChannel.lastHash,
+                offset: ooChannel.lastOffset,
                 index: ooChannel.cpIndex,
                 callback: uploadedCallback
             };
@@ -2048,6 +2066,7 @@ define([
                     };
                 });
                 ooChannel.historyLastHash = ooChannel.lastHash;
+                ooChannel.historyLastOffset = ooChannel.lastOffset;
                 ooChannel.currentIndex = ooChannel.cpIndex;
                 loadCp(lastCp, true);
             });
@@ -2206,6 +2225,7 @@ define([
                     tippy: Messages.historyButton
                 }).click(function () {
                     ooChannel.historyLastHash = ooChannel.lastHash;
+                    ooChannel.historyLastOffset = ooChannel.lastOffset;
                     ooChannel.currentIndex = ooChannel.cpIndex;
                     Feedback.send('OO_HISTORY');
                     var histConfig = {
@@ -2217,7 +2237,7 @@ define([
                         onlyoffice: {
                             hashes: content.hashes || {},
                             channel: content.channel,
-                            lastHash: ooChannel.lastHash
+                            lastHash: ooChannel.lastHash // XXX OFFSET ??
                         },
                         $toolbar: $('.cp-toolbar-container')
                     };
@@ -2327,6 +2347,7 @@ define([
                 var newLatest = getLastCp();
                 sframeChan.query('Q_OO_SAVE', {
                     hash: newLatest.hash,
+                    offset: newLatest.offset,
                     url: newLatest.file
                 }, function () { });
                 newDoc = !content.hashes || Object.keys(content.hashes).length === 0;
@@ -2465,6 +2486,7 @@ define([
                     // New checkpoint
                     sframeChan.query('Q_OO_SAVE', {
                         hash: newLatest.hash,
+                        offset: newLatest.offset,
                         url: newLatest.file
                     }, function () {
                         checkNewCheckpoint();

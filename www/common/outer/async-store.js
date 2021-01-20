@@ -1675,8 +1675,9 @@ define([
                     }
                     postMessage(clientId, "PAD_READY", pad.noCache);
                 },
-                onMessage: function (m, user, validateKey, isCp, hash) {
+                onMessage: function (m, user, validateKey, isCp, hash, curve, offset) {
                     channel.lastHash = hash;
+                    channel.lastOffset = offset;
                     channel.pushHistory(m, isCp);
                     channel.bcast("PAD_MESSAGE", {
                         user: user,
@@ -1757,12 +1758,13 @@ define([
                 onConnect: function (wc, sendMessage) {
                     channel.sendMessage = function (msg, cId, cb) {
                         // Send to server
-                        sendMessage(msg, function (err) {
+                        sendMessage(msg, function (err, hash, offset) {
                             if (err) {
                                 return void cb({ error: err });
                             }
                             // Broadcast to other tabs
-                            channel.lastHash = msg.slice(0,64);
+                            channel.lastHash = hash;
+                            channel.lastOffset = offset;
                             channel.pushHistory(CpNetflux.removeCp(msg), /^cp\|/.test(msg));
                             channel.bcast("PAD_MESSAGE", {
                                 user: wc.myID,
@@ -1912,6 +1914,7 @@ define([
             if (!chan.lastHash) { return void cb({error: 'EINVAL'}); }
             cb({
                 hash: chan.lastHash
+                // XXX OFFSET ???
             });
         };
 
@@ -2156,7 +2159,8 @@ define([
 
             var cfg = {
                 txid: txid,
-                lastKnownHash: data.lastKnownHash
+                lastKnownHash: data.lastKnownHash,
+                lkhOffset: data.lkhOffset
             };
             var msg = ['GET_HISTORY', data.channel, cfg];
             network.sendto(hk, JSON.stringify(msg));

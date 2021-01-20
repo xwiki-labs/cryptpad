@@ -502,6 +502,7 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
         var me = keys.myCurvePublic;
         var channel = config.channel;
         var lastKnownHash = config.lastKnownHash || -1;
+        var lkhOffset = config.lhkOffset;
 
         var ref = {
             state: {
@@ -512,6 +513,7 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
                 initialized: false,
                 sinceLastCheckpoint: 0,
                 lastCheckpointHash: lastKnownHash,
+                lastCheckpointOffset: lkhOffset,
             },
         };
         var roster = {};
@@ -549,6 +551,9 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
 
         roster.getLastCheckpointHash = function () {
             return ref.internal.lastCheckpointHash || -1;
+        };
+        roster.getLastCheckpointOffset = function () {
+            return ref.internal.lastCheckpointOffset || -1;
         };
 
         var clearPendingCheckpoints = function () {
@@ -610,7 +615,7 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
              return Boolean(ready && me);
         };
 
-        var onMessage = function (msg, user, vKey, isCp , hash, author) {
+        var onMessage = function (msg, user, vKey, isCp , hash, author, offset) {
             // count messages received since the last checkpoint
             // even if they fail to parse
             ref.internal.sinceLastCheckpoint++;
@@ -645,10 +650,11 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
 
             // if a checkpoint was successfully applied, emit an event
             if (parsed[0] === 'CHECKPOINT' && changed) {
-                if (isReady()) { events.checkpoint.fire(hash); }
+                if (isReady()) { events.checkpoint.fire(hash, offset); }
                 // reset the counter for messages since the last checkpoint
                 ref.internal.sinceLastCheckpoint = 0;
                 ref.internal.lastCheckpointHash = hash;
+                ref.internal.lastCheckpointOffset = offset;
             } else if (changed) {
                 if (isReady()) { events.change.fire(); }
             }
@@ -845,6 +851,7 @@ var factory = function (Util, Hash, CPNetflux, Sortify, nThen, Crypto, Feedback)
                 // malicious users with the signing key could send cp| messages
                 // and fool new users into initializing their session incorrectly
                 lastKnownHash: lastKnownHash,
+                lkhOffset: lkhOffset,
 
                 network: config.network,
                 channel: config.channel,

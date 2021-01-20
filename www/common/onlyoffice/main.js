@@ -40,6 +40,7 @@ define([
                     Cryptpad.setPadAttribute('lastVersion', data.url, cb);
                 });
                 Cryptpad.setPadAttribute('lastCpHash', data.hash, cb);
+                Cryptpad.setPadAttribute('lastCpOffset', data.offset, cb);
             });
             sframeChan.on('Q_OO_OPENCHANNEL', function (data, cb) {
                 Cryptpad.getPadAttribute('rtChannel', function (err, res) {
@@ -70,6 +71,7 @@ define([
                             expire: expire,
                             channel: data.channel,
                             lastCpHash: data.lastCpHash,
+                            lastCpOffset: data.lastCpOffset,
                             padChan: Utils.secret.channel,
                             validateKey: Utils.secret.keys.validateKey
                         }
@@ -107,8 +109,10 @@ define([
                     obj.data.msg = Utils.crypto.encrypt(JSON.stringify(obj.data.msg));
                     var hash = obj.data.msg.slice(0,64);
                     var _cb = cb;
-                    cb = function () {
-                        _cb(hash);
+                    cb = function (obj) {
+                        if (obj && obj.offset) { obj.hash = hash; }
+                        else { obj = { hash: hash }; }
+                        _cb(obj);
                     };
                 }
                 Cryptpad.onlyoffice.execCommand(obj, cb);
@@ -128,7 +132,8 @@ define([
                         var msg = obj.data.msg;
                         obj.data = {
                             msg: JSON.parse(Utils.crypto.decrypt(msg, validateKey, skipCheck)),
-                            hash: msg.slice(0,64)
+                            hash: msg.slice(0,64),
+                            offset: obj.data.offset
                         };
                     } catch (e) {
                         console.error(e);

@@ -235,9 +235,11 @@ define([
             ctx.updateMetadata();
             ctx.emit('ROSTER_CHANGE', id, team.clients);
         });
-        roster.on('checkpoint', function (hash) {
+        roster.on('checkpoint', function (hash, offset) {
             var rosterData = Util.find(ctx, ['store', 'proxy', 'teams', id, 'keys', 'roster']);
+            console.error(hash, offset); // XXX
             rosterData.lastKnownHash = hash;
+            rosterData.lkhOffset = offset;
         });
 
         // Update metadata
@@ -459,6 +461,7 @@ define([
                 keys: rosterKeys,
                 anon_rpc: ctx.store.anon_rpc,
                 lastKnownHash: rosterData.lastKnownHash,
+                lkhOffset: rosterData.lkhOffset,
             }, waitFor(function (err, _roster) {
                 if (err) {
                     waitFor.abort();
@@ -468,6 +471,7 @@ define([
                 roster = _roster;
 
                 rosterData.lastKnownHash = roster.getLastCheckpointHash();
+                rosterData.lkhOffset = roster.getLastCheckpointOffset();
 
                 // If we've been kicked, don't try to update our data, we'll close everything
                 // in the next nThen part

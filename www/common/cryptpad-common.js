@@ -1571,7 +1571,8 @@ define([
             cryptgetVal.content.hashes = {};
             common.getHistory({
                 channel: oldRtChannel,
-                lastKnownHash: lastCp.hash
+                lastKnownHash: lastCp.hash,
+                lkhOffset: lastCp.offset
             }, waitFor(function (obj) {
                 if (obj && obj.error) {
                     waitFor.abort();

@@ -72,7 +72,8 @@ define([
             if (id === data.rtChannel && data.lastVersion && data.lastCpHash) {
                 return {
                     channel: id,
-                    lastKnownHash: data.lastCpHash
+                    lastKnownHash: data.lastCpHash,
+                    lkhOffset: data.lastCpOffset
                 };
             }
             return {

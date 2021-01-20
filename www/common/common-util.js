@@ -575,6 +575,16 @@
       return isEmoji(emojis[0])? emojis[0]: str[0];
     };
 
+    Util.findIndex = function (arr, test) {
+        var idx = -1;
+        arr.some(function (value, i) {
+            if (!test(value)) { return; }
+            idx = i;
+            return true;
+        });
+        return idx;
+    };
+
     if (typeof(module) !== 'undefined' && module.exports) {
         module.exports = Util;
     } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {

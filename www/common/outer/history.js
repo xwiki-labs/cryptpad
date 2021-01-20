@@ -73,7 +73,7 @@ define([
         return team.rpc;
     };
 
-    var getHistoryData = function (ctx, channel, lastKnownHash, teamId, _cb) {
+    var getHistoryData = function (ctx, channel, lastKnownHash, lkhOffset, teamId, _cb) {
         var cb = Util.once(Util.mkAsync(_cb));
         var edPublic = getEdPublic(ctx, teamId);
         var Store = ctx.Store;
@@ -100,7 +100,8 @@ define([
             // Pad
             Store.getHistory(null, {
                 channel: channel,
-                lastKnownHash: lastKnownHash
+                lastKnownHash: lastKnownHash,
+                lkhOffset: lkhOffset
             }, waitFor(function (obj) {
                 if (obj && obj.error) {
                     waitFor.abort();
@@ -159,11 +160,13 @@ define([
             channels.forEach(function (chan) {
                 var channel = chan;
                 var lastKnownHash;
+                var lkhOffset;
                 if (typeof (chan) === "object" && chan.channel) {
                     channel = chan.channel;
                     lastKnownHash = chan.lastKnownHash;
+                    lkhOffset = chan.lkhOffset;
                 }
-                getHistoryData(ctx, channel, lastKnownHash, data.teamId, waitFor(function (obj) {
+                getHistoryData(ctx, channel, lastKnownHash, lkhOffset, data.teamId, waitFor(function (obj) {
                     if (obj && obj.error) {
                         warning.push(obj.error);
                         return;

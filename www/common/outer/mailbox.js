@@ -23,6 +23,7 @@ define([
             mailboxes.notifications = {
                 channel: Hash.createChannelId(),
                 lastKnownHash: '',
+                lkhOffset: 0,
                 viewed: []
             };
             ctx.pinPads([mailboxes.notifications.channel], function (res) {
@@ -33,6 +34,7 @@ define([
             mailboxes.support = {
                 channel: Hash.createChannelId(),
                 lastKnownHash: '',
+                lkhOffset: 0,
                 viewed: []
             };
             ctx.pinPads([mailboxes.support.channel], function (res) {
@@ -144,10 +146,13 @@ proxy.mailboxes = {
         // If the hash in in our history, get the index from the history:
         // - if the index is 0, we can change our lastKnownHash
         // - otherwise, just push to view
-        var idx = box.history.indexOf(hash);
+        var idx = Util.findIndex(box.history, function (obj) {
+            return obj.hash === hash;
+        });
         if (idx !== -1) {
             if (idx === 0) {
                 m.lastKnownHash = hash;
+                m.lkhOffset = box.history[idx].offset;
                 box.history.shift();
             } else if (m.viewed.indexOf(hash) === -1) {
                 m.viewed.push(hash);
@@ -158,20 +163,23 @@ proxy.mailboxes = {
         // Check the "viewed" array to see if we're able to bump lastKnownhash more
         var sliceIdx;
         var lastKnownHash;
+        var lkhOffset;
         var toForget = [];
-        box.history.some(function (hash, i) {
-            // naming here is confusing... isViewed implies it's a boolean
-            // when in fact it's an index
-            var isViewed = m.viewed.indexOf(hash);
+        box.history.some(function (obj, i) {
+            var hash = obj.hash;
+            var offset = obj.offset;
+
+            var viewedIdx = m.viewed.indexOf(hash);
 
             // iterate over your history until you hit an element you haven't viewed
-            if (isViewed === -1) { return true; }
+            if (viewedIdx === -1) { return true; }
             // update the index that you'll use to slice off viewed parts of history
             sliceIdx = i + 1;
             // keep track of which hashes you should remove from your 'viewed' array
             toForget.push(hash);
             // prevent fetching dismissed messages on (re)connect
             lastKnownHash = hash;
+            lkhOffset = offset;
         });
 
         // remove all elements in 'toForget' from the 'viewed' array in one step
@@ -182,6 +190,7 @@ proxy.mailboxes = {
         if (sliceIdx) {
             box.history = box.history.slice(sliceIdx);
             m.lastKnownHash = lastKnownHash;
+            m.lkhOffset = lkhOffset;
         }
 
         // Make sure we remove data about dismissed messages
@@ -248,7 +257,8 @@ proxy.mailboxes = {
             noChainPad: true,
             crypto: crypto,
             owners: opts.owners || [ctx.store.proxy.edPublic],
-            lastKnownHash: m.lastKnownHash
+            lastKnownHash: m.lastKnownHash,
+            lkhOffset: m.lkhOffset
         };
         cfg.onConnectionChange = function () {}; // Allow reconnections in chainpad-netflux
         cfg.onConnect = function (wc, sendMessage) {
@@ -262,9 +272,12 @@ proxy.mailboxes = {
                 } catch (e) {
                     console.error(e);
                 }
-                sendMessage(msg, function (err, hash) {
+                sendMessage(msg, function (err, hash, offset) {
                     if (err) { return void console.error(err); }
-                    box.history.push(hash);
+                    box.history.push({
+                        hash: hash,
+                        offset: offset
+                    });
                     box.content[hash] = _msg;
                     var message = {
                         msg: _msg,
@@ -280,7 +293,7 @@ proxy.mailboxes = {
             box.queue = [];
         };
         var lastReceivedHash; // Don't send a duplicate of the last known hash on reconnect
-        box.onMessage = cfg.onMessage = function (msg, user, vKey, isCp, hash, author) {
+        box.onMessage = cfg.onMessage = function (msg, user, vKey, isCp, hash, author, offset) {
             if (hash === m.lastKnownHash) { return; }
             if (hash === lastReceivedHash) { return; }
             lastReceivedHash = hash;
@@ -290,7 +303,10 @@ proxy.mailboxes = {
                 console.error(e);
             }
             if (author) { msg.author = author; }
-            box.history.push(hash);
+            box.history.push({
+                hash: hash,
+                offset: offset
+            });
             if (isMessageNew(hash, m)) {
                 // Message should be displayed
                 var message = {
