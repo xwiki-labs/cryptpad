@@ -2361,9 +2361,6 @@ define([
                 case TRASH:
                     msg = Messages.fm_info_trash;
                     break;
-                case FILES_DATA:
-                    msg = Messages.fm_info_allFiles;
-                    break;
                 case RECENT:
                     msg = Messages.fm_info_recent;
                     break;

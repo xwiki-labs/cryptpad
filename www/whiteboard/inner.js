@@ -555,14 +555,6 @@ define([
                     disabled: 'disabled',
                     title: Messages.canvas_delete
                 }),
-                /*
-                h('button#cp-app-whiteboard-toggledraw.btn.btn-secondary', Messages.canvas_disable),
-                h('button#cp-app-whiteboard-toggledraw.btn.btn-secondary', Messages.canvas_disable),
-                h('button#cp-app-whiteboard-delete.btn.btn-secondary', {
-                    style: {
-                        display: 'none',
-                    }
-                }, Messages.canvas_delete),*/
                 h('div.cp-whiteboard-brush', [
                     h('div.cp-app-whiteboard-range-group', [
                         h('label', {
