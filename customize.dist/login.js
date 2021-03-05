@@ -419,14 +419,29 @@ define([
             var blockRequest = Block.serialize(JSON.stringify(toPublish), res.opt.blockKeys);
 
             rpc.writeLoginBlock(blockRequest, waitFor(function (e) {
-                if (e) { return void console.error(e); }
-
-                console.log("blockInfo available at:", blockHash);
-                LocalStore.setBlockHash(blockHash);
-                LocalStore.login(userHash, uname, function () {
-                    cb(void 0, res);
-                });
+                if (e) {
+                    // XXX
+                    waitFor.abort();
+                    console.error(e);
+                    cb("// XXX_1");
+                }
             }));
+        }).nThen(function (waitFor) {
+            // XXX confirm that the login block is accessible and correct
+            var blockUrl = Block.getBlockUrl(res.opt.blockKeys);
+            Util.fetch(blockUrl, waitFor(function (err, block) {
+                if (err) {
+                    waitFor.abort();
+                    return void cb("// XXX_2");
+                }
+                console.log(block); // XXX check that the creating block is actually correct?
+            }));
+        }).nThen(function () {
+            console.log("blockInfo available at:", blockHash);
+            LocalStore.setBlockHash(blockHash);
+            LocalStore.login(userHash, uname, function () {
+                cb(void 0, res);
+            });
         });
     };
     Exports.redirect = function () {
