@@ -3,7 +3,7 @@
 	<head>
 		<title>Formats des documents électroniques pris en charge</title>
 		<meta charset="utf-8" />
-		<meta name="description" content="The list of document formats supported by Document Editor" />
+		<meta name="description" content="Formats des documents électroniques pris en charge" />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
         <script type="text/javascript" src="../callback.js"></script>
         <script type="text/javascript" src="../search/js/page-search.js"></script>
@@ -11,7 +11,7 @@
 	<body>
 		<div class="mainpart">
         <div class="search-field">
-            <input id="search" class="searchBar" placeholder="Recherche" type="text" onkeypress="doSearch(event)">
+            <input id="search" class="searchBar" placeholder="Rechercher" type="text" onkeypress="doSearch(event)">
         </div>
 		<h1>Formats des documents électroniques pris en charge</h1>
 			<p>Les documents électroniques représentent l'un des types des fichiers les plus utilisés en informatique. Grâce à l'utilisation du réseau informatique tant développé aujourd'hui, il est possible et plus pratique de distribuer des documents électroniques que des versions imprimées. Les formats de fichier ouverts et propriétaires sont bien nombreux à cause de la variété des périphériques utilisés pour la présentation des documents. <b>Document Editor</b> prend en charge les formats les plus populaires.</p>
@@ -27,7 +27,7 @@
 					<td>DOC</td>
 					<td>L'extension de nom de fichier pour les documents du traitement textuel créé avec Microsoft Word</td>
 					<td>+</td>
-					<td></td>
+					<td>+</td>
 					<td></td>
 				</tr>
 				<tr>
@@ -37,13 +37,35 @@
 					<td>+</td>
 					<td>+</td>
 				</tr>
+                <tr>
+                    <td>DOTX</td>
+                    <td>Word Open XML Document Template<br />Format de fichier zippé, basé sur XML, développé par Microsoft pour les modèles de documents texte. Un modèle DOTX contient des paramètres de mise en forme, des styles, etc. et peut être utilisé pour créer plusieurs documents avec la même mise en forme.</td>
+                    <td>+</td>
+                    <td>+</td>
+                    <td>+</td>
+                </tr>
 				<tr>
+					<td>FB2</td>
+					<td>Une extention de livres électroniques qui peut être lancé par votre ordinateur ou appareil mobile</td>
+					<td>+</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+
 					<td>ODT</td>
 					<td>Le format de fichier du traitement textuel d'OpenDocument, le standard ouvert pour les documents électroniques</td>
 					<td>+</td>
 					<td>+</td>
 					<td>+</td>
 				</tr>
+                <tr>
+                    <td>OTT</td>
+                    <td>OpenDocument Document Template<br />Format de fichier OpenDocument pour les modèles de document texte. Un modèle OTT contient des paramètres de mise en forme, des styles, etc. et peut être utilisé pour créer plusieurs documents avec la même mise en forme.</td>
+                    <td>+</td>
+                    <td>+</td>
+                    <td>+</td>
+                </tr>
 				<tr>
 					<td>RTF</td>
 					<td>Rich Text Format<br />Le format de fichier du document développé par Microsoft pour la multiplateforme d'échange des documents</td>
@@ -65,12 +87,19 @@
 					<td></td>
 					<td>+</td>
 				</tr>
+                <tr>
+                    <td>PDF/A</td>
+                    <td>Portable Document Format / A<br />Une version normalisée ISO du format PDF (Portable Document Format) conçue pour l'archivage et la conservation à long terme des documents électroniques.</td>
+                    <td>+</td>
+                    <td></td>
+                    <td>+</td>
+                </tr>
 				<tr>
 					<td>HTML</td>
 					<td>HyperText Markup Language<br />Le principale langage de balisage pour les pages web</td>
-					<td></td>
-					<td></td>
 					<td>+</td>
+					<td>+</td>
+					<td>dans la version en ligne</td>
 				</tr>
 				<tr>
 					<td>EPUB</td>
@@ -105,7 +134,9 @@
 					<td>+</td>
 					<td></td>
 					<td></td>
-				</tr>--></table>
+				</tr>-->
+				</table>
+				<p class="note"><b>Remarque</b>: Les formats HTML/EPUB/MHT n'ont pas besoin de Chromium et sont disponibles sur toutes les plateformes.</p>
 		</div>
 	</body>
 </html>

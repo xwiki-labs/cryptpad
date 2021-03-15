@@ -14,28 +14,48 @@
             <input id="search" class="searchBar" placeholder="Buscar" type="text" onkeypress="doSearch(event)">
         </div>
             <h1>Guarde/imprima<span class="onlineDocumentFeatures">/descargue</span> su presentación</h1>
-            <p>Cuando usted trabaja en su presentación, <b>el editor de presentaciones</b> guarda su archivo cada 2 segundos automáticamente preveniendo la pérdida de datos en caso de un cierre inesperado del programa. <span class="onlineDocumentFeatures">Si está editando el archivo con varias personas a la vez en el modo <b>Rápido</b>, el temporizador requiere actualizaciones 25 veces por segundo y guarda los cambios si estos se han producido. Si el archivo se está editando por varias personas a la vez en el modo <b>Estricto</b>, los cambios se guardan de forma automática cada 10 minutos. Si lo necesita, puede de forma fácil seleccionar el modo de co-edición preferido o desactivar la función <b>Autoguardado</b> en la página <a href="../HelpfulHints/AdvancedSettings.htm" onclick="onhyperlinkclick(this)">Ajustes avanzados</a>.</span></p>
-            <p>Para guardar su presentación actual de forma manual,</p>
+            <h3>Guardando</h3>
+            <p class="onlineDocumentFeatures">Por defecto, el <b>Editor de presentaciones</b> guarda automáticamente el archivo cada 2 segundos cuando trabaja en ella, evitando la pérdida de datos en caso de cierre inesperado del programa. Si co-edita el archivo en el modo <b>Rápido</b>, el tiempo requerido para actualizaciones es de 25 cada segundo y guarda los cambios si estos se han producido. Si el archivo se está editando por varias prsonas a la vez, los cambios se guardan cada 10 minutos. Se puede fácilmente desactivar la función <b>Autoguardado</b> en la página <a href="../HelpfulHints/AdvancedSettings.htm" onclick="onhyperlinkclick(this)">Ajustes avanzados</a>.</p>
+            <p>Para guardar su presentación manualmente en el formato y la ubicación actuales,</p>
             <ul>
-                <li>pulse el icono <img alt="Icono Guardar" src="../images/save.png" /> <b>Guardar</b> en la barra de herramientas superior, o</li>
+                <li>Pulse el icono <img alt="Icono Guardar" src="../images/save.png" /> <b>Guardar</b>  en la parte izquierda de la cabecera del editor, o</li>
                 <li>use la combinación de las teclas <b>Ctrl+S</b>, o</li>
-                <li>haga clic en la pestaña <b>Archivo</b> en la barra de herramientas superior y seleccione la opción <b>Guardar</b>.</li>
+                <li>pulse el icono <b>Archivo</b> en la barra izquierda lateral y seleccione la opción <b>Guardar</b>.</li>
             </ul>
-            <p>Para imprimir la presentación actual,</p>
-            <ul>
-                <li>haga clic en el icono <img alt="Icono Imprimir" src="../images/print.png" /> <b>Imprimir</b> en la barra de herramientas superior, o</li>
-                <li>use la combinación de las teclas <b>Ctrl+P</b>, o</li>
-                <li>haga clic en la pestaña <b>Archivo</b>  en la barra de herramientas superior y seleccione la opción <b>Imprimir</b>.</li>
-            </ul>
+            <p class="note desktopDocumentFeatures"><b>Nota</b>: en la <em>versión de escritorio</em>, para evitar la pérdida de datos en caso de cierre inesperado del programa, puede activar la opción <b>Autorecuperación</b> en la página de <a href="../HelpfulHints/AdvancedSettings.htm" onclick="onhyperlinkclick(this)">Ajustes avanzados </a>.</p>
+            <div class="desktopDocumentFeatures">
+                <p>En la <em>versión de escritorio</em>, puede guardar la presentación con otro nombre, en una nueva ubicación o con otro formato,</p>
+                <ol>
+                    <li>haga clic en la pestaña <b>Archivo</b> en la barra de herramientas superior,</li>
+                    <li>seleccione la opción <b>Guardar como...</b>,</li>
+                    <li>elija uno de los formatos disponibles: PPTX, ODP, PDF, PDFA. También puede seleccionar la opción <b>Plantilla de presentación</b> (POTX o OTP).</li>
+                </ol>
+            </div>
             <div class="onlineDocumentFeatures">
-                <p>Después el archivo PDF se generará basándose en la presentación editada. Usted puede abrirlo e imprimirlo, o guardarlo en el disco duro de su ordenador o en un medio extraíble para imprimirlo más tarde.</p>
-                <p>Para descargar la presentación al disco duro de su ordenador,</p>
+                <h3>Descargando</h3>
+                <p>En la <em>versión en línea</em>, puede descargar la presentación creada en el disco duro de su ordenador,</p>
                 <ol>
                     <li>haga clic en la pestaña <b>Archivo</b> en la barra de herramientas superior,</li>
                     <li>seleccione la opción <b>Descargar como</b>,</li>
-                    <li>elija uno de los siguientes formatos disponibles dependiendo en sus necesidades: PPTX, PDF o ODP.</li>
+                    <li>elija uno de los formatos disponibles: PPTX, PDF, ODP, POTX, PDF/A, OTP.</li>
+                </ol>
+                <h3>Guardando una copia</h3>
+                <p>En la <em>versión en línea</em>, puede guardar una copia del archivo en su portal,</p>
+                <ol>
+                    <li>haga clic en la pestaña <b>Archivo</b> en la barra de herramientas superior,</li>
+                    <li>seleccione la opción <b>Guardar copia como...</b>,</li>
+                    <li>elija uno de los formatos disponibles: PPTX, PDF, ODP, POTX, PDF/A, OTP,</li>
+                    <li>seleccione una ubicación para el archivo en el portal y pulse <b>Guardar</b>.</li>
                 </ol>
             </div>
+            <h3 id="print">Imprimiendo</h3>
+            <p>Para imprimir la presentación actual,</p>
+            <ul>
+                <li>haga clic en el icono <img alt="Icono Imprimir" src="../images/print.png" /> <b>Imprimir</b> en la parte izquierda de la cabecera del editor, o bien</li>
+                <li>use la combinación de las teclas <b>Ctrl+P</b>, o</li>
+                <li>pulse el icono <b>Archivo</b> en la barra izquierda lateral y seleccione la opción <b>Imprimir</b>.</li>
+            </ul>
+            <p><span class="desktopDocumentFeatures">En la <em>versión de escritorio</em>, el archivo se imprimirá directamente.</span><span class="onlineDocumentFeatures">En la<em>versión en línea</em>, se generará un archivo PDF a partir de la presentación. Puede abrirlo e imprimirlo, o guardarlo en el disco duro de su ordenador o en un medio extraíble para imprimirlo más tarde. Algunos navegadores (como Chrome y Opera) permiten la impresión directa.</span></p>
         </div>
 	</body>
 </html>

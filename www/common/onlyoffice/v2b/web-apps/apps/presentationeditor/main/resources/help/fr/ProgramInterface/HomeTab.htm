@@ -3,7 +3,7 @@
 	<head>
 		<title>Onglet Accueil</title>
 		<meta charset="utf-8" />
-        <meta name="description" content="Introducing the Presentation Editor user interface - Home tab" />
+        <meta name="description" content="Présentation de l'interface utilisateur de Presentation Editor - L'onglet Acceuil" />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
         <script type="text/javascript" src="../callback.js"></script>
         <script type="text/javascript" src="../search/js/page-search.js"></script>
@@ -11,11 +11,18 @@
 	<body>
 		<div class="mainpart">
         <div class="search-field">
-            <input id="search" class="searchBar" placeholder="Recherche" type="text" onkeypress="doSearch(event)">
+            <input id="search" class="searchBar" placeholder="Rechercher" type="text" onkeypress="doSearch(event)">
         </div>
 			<h1>Onglet Accueil</h1>
-            <p>L'onglet <b>Accueil</b> s'ouvre par défaut lorsque vous ouvrez une présentation. Il permet de définir les paramètres généraux de la diapositive, formater le texte, insérer des objets, les aligner et les organiser.</p>
-            <p><img alt="Onglet Accueil" src="../images/interface/hometab.png" /></p>
+            <p>L'onglet <b>Accueil</b> s'ouvre par défaut lorsque vous ouvrez une présentation. Il permet de définir les paramètres généraux de la diapositive, mettre en forme le texte, insérer des objets, les aligner et les organiser.</p>
+            <div class="onlineDocumentFeatures">
+                <p>Fenêtre de l'éditeur en ligne Presentation Editor :</p>
+                <p><img alt="Onglet Accueil" src="../images/interface/hometab.png" /></p>
+            </div>
+            <div class="desktopDocumentFeatures">
+                <p>Fenêtre de l'éditeur de bureau Presentation Editor :</p>
+                <p><img alt="Onglet Accueil" src="../images/interface/desktop_hometab.png" /></p>
+            </div>
             <p>En utilisant cet onglet, vous pouvez :</p>
             <ul>
                 <li>gérer les <a href="../UsageInstructions/ManageSlides.htm" onclick="onhyperlinkclick(this)">diapositives</a> et <a href="../UsageInstructions/PreviewPresentation.htm" onclick="onhyperlinkclick(this)">démarrer le diaporama</a>,</li>
@@ -23,8 +30,7 @@
                 <li>insérer des <a href="../UsageInstructions/InsertText.htm" onclick="onhyperlinkclick(this)">zones de texte</a>, des <a href="../UsageInstructions/InsertImages.htm" onclick="onhyperlinkclick(this)">images</a>, des <a href="../UsageInstructions/InsertAutoshapes.htm" onclick="onhyperlinkclick(this)">formes</a>,</li>
                 <li><a href="../UsageInstructions/AlignArrangeObjects.htm" onclick="onhyperlinkclick(this)">aligner et organiser des objets</a> dans une diapositive,</li>
                 <li><a href="../UsageInstructions/CopyClearFormatting.htm" onclick="onhyperlinkclick(this)">copier/effacer</a> la mise en forme du texte,</li>
-                <li>changer <a href="../UsageInstructions/SetSlideParameters.htm" onclick="onhyperlinkclick(this)">un thème, un jeu de couleurs ou une taille de diapositive</a>,</li>
-                <li>Ajustez les <a href="../HelpfulHints/Navigation.htm" onclick="onhyperlinkclick(this)">Paramètres d'affichage</a> et accédez aux <a href="../HelpfulHints/AdvancedSettings.htm" onclick="onhyperlinkclick(this)">Paramètres avancés</a> de l'éditeur.</li>
+                <li>changer <a href="../UsageInstructions/SetSlideParameters.htm" onclick="onhyperlinkclick(this)">le thème, le jeu de couleurs ou la taille de diapositive</a>.</li>
             </ul>
 		</div>
 	</body>

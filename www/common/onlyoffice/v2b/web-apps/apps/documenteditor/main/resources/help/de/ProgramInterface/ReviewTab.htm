@@ -3,7 +3,7 @@
 	<head>
 		<title>Registerkarte Zusammenarbeit</title>
 		<meta charset="utf-8" />
-        <meta name="description" content="Introducing the Document Editor user interface - Collaboration tab" />
+        <meta name="description" content="Einführung in die Benutzeroberfläche des Dokumenteneditors – die Registerkarte «Zusammenarbeit»" />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
         <script type="text/javascript" src="../callback.js"></script>
         <script type="text/javascript" src="../search/js/page-search.js"></script>
@@ -14,18 +14,26 @@
             <input id="search" class="searchBar" placeholder="Suche" type="text" onkeypress="doSearch(event)">
         </div>
 			<h1>Registerkarte Zusammenarbeit</h1>
-            <p>Unter der Registerkarte <b>Zusammenarbeit</b> können Sie die Zusammenarbeit im Dokument organisieren: die Datei teilen, einen Co-Bearbeitungsmodus auswählen, Kommentare verwalten, vorgenommene Änderungen verfolgen, alle Versionen und Revisionen einsehen.</p>
-            <p><img alt="Registerkarte Zusammenarbeit" src="../images/interface/reviewtab.png" /></p>	
-            <p>Sie können:</p>
+            <p>Unter der Registerkarte <b>Zusammenarbeit</b> können Sie die Zusammenarbeit im Dokument organisieren. <span class="onlineDocumentFeatures">In der <em>Online-Version</em> können Sie die Datei mit jemanden teilen, einen gleichzeitigen Bearbeitungsmodus auswählen, Kommentare verwalten, von einem Zugriffsberechtigtem vorgenommene Änderungen nachverfolgen und alle Versionen und Überarbeitungen einsehen.</span> <span class="desktopDocumentFeatures">In der <em>Desktop-Version</em> können Sie Kommentare verwalten und die Funktion ‘Änderungen nachverfolgen’ nutzen</span>.</p>
+            <div class="onlineDocumentFeatures">
+                <p>Dialogbox Online-Dokumenteneditor:</p>
+                <p><img alt="Registerkarte Zusammenarbeit" src="../images/interface/reviewtab.png" /></p>
+            </div>
+            <div class="desktopDocumentFeatures">
+                <p>Dialogbox Desktop-Dokumenteneditor:</p>
+                <p><img alt="Registerkarte Zusammenarbeit" src="../images/interface/desktop_reviewtab.png" /></p>
+            </div>
+            <p>Auf dieser Registerkarte können Sie:</p>
             <ul>
-                <li><a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Freigabeeinstellungen</a> festlegen,</li>
-                <li>zwischen den verfügbaren Modi für die Co-Bearbeitung wechseln, <a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Strikt und Schnell</a>,</li>
+                <li class="onlineDocumentFeatures"><a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Freigabeeinstellungen</a> festlegen (nur in der <em>Online-Version</em> verfügbar),</li>
+                <li class="onlineDocumentFeatures">zwischen den gleichzeitigen Bearbeitung-Modi <a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Strikt und Schnell</a> wechseln (nur in der <em>Online-Version</em> verfügbar),</li>
                 <li><a href="../HelpfulHints/CollaborativeEditing.htm#comments" onclick="onhyperlinkclick(this)">Kommentare</a> zum Dokument hinzufügen,</li>
-                <li>die Funktion <a href="../HelpfulHints/Review.htm" onclick="onhyperlinkclick(this)">Änderungen nachverfolgen</a> aktivieren,</li>
+                <li>die Funktion ’<a href="../HelpfulHints/Review.htm" onclick="onhyperlinkclick(this)">Änderungen nachverfolgen</a>’ aktivieren,</li>
                 <li><a href="../HelpfulHints/Review.htm#displaymode" onclick="onhyperlinkclick(this)">Änderungen</a> anzeigen lassen,</li>
                 <li>die <a href="../HelpfulHints/Review.htm#managechanges" onclick="onhyperlinkclick(this)">vorgeschlagenen Änderungen</a> verwalten,</li>
-                <li>die <a href="../HelpfulHints/CollaborativeEditing.htm#chat" onclick="onhyperlinkclick(this)">Chatleiste</a> öffnen,</li>
-                <li>und die <a href="../UsageInstructions/ViewDocInfo.htm" onclick="onhyperlinkclick(this)">Versionshistorie</a> verfolgen.</li>
+                <li>ein Dokument zum <a href="../HelpfulHints/Comparison.htm" onclick="onhyperlinkclick(this)">vergleich</a> laden (nur in der <em>Online-Version</em> verfügbar),</li> 
+                <li class="onlineDocumentFeatures">die <a href="../HelpfulHints/CollaborativeEditing.htm#chat" onclick="onhyperlinkclick(this)">Diskussions-Leiste</a> öffnen (nur in der <em>Online-Version</em> verfügbar),</li>
+                <li class="onlineDocumentFeatures"><a href="../UsageInstructions/ViewDocInfo.htm" onclick="onhyperlinkclick(this)">Versionsverläufe</a> nachverfolgen (nur in der <em>Online-Version</em> verfügbar).</li>
             </ul>
 		</div>
 	</body>

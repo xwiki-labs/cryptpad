@@ -10,24 +10,24 @@
 	</head>
 	<body>
 		<div class="mainpart">
-        <div class="search-field">
-            <input id="search" class="searchBar" placeholder="Suche" type="text" onkeypress="doSearch(event)">
-        </div>
-		<h1>Unterstützte Formate von elektronischen Dokumenten</h1>
+			<div class="search-field">
+				<input id="search" class="searchBar" placeholder="Suche" type="text" onkeypress="doSearch(event)">
+			</div>
+			<h1>Unterstützte Formate von elektronischen Dokumenten</h1>
 			<p>Elektronische Dokumente stellen die am meisten benutzte Computerdateien dar. Dank des inzwischen hoch entwickelten Computernetzwerks ist es bequemer anstatt von gedruckten Dokumenten elektronische Dokumente zu verbreiten. Aufgrund der Vielfältigkeit der Geräte, die für die Anzeige der Dokumente verwendet werden, gibt es viele proprietäre und offene Dateiformate. Der <b>Dokumenteneditor</b> unterstützt die geläufigsten Formate.</p>
 			<table>
 				<tr>
-					<td><b>Format</b></td>
+					<td><b>Formate</b></td>
 					<td><b>Beschreibung</b></td>
-					<td>Anzeigen</td>
-					<td>Bearbeiten</td>
+					<td>Anzeige</td>
+					<td>Bearbeitung</td>
 					<td>Download</td>
 				</tr>
 				<tr>
 					<td>DOC</td>
 					<td>Dateierweiterung für Textverarbeitungsdokumente, die mit Microsoft Word erstellt werden</td>
 					<td>+</td>
-					<td></td>
+					<td>+</td>
 					<td></td>
 				</tr>
 				<tr>
@@ -38,8 +38,29 @@
 					<td>+</td>
 				</tr>
 				<tr>
+					<td>DOTX</td>
+					<td>Word Open XML Dokumenten-Vorlage<br />Gezipptes, XML-basiertes, von Microsoft für Dokumentenvorlagen entwickeltes Dateiformat. Eine DOTX-Vorlage enthält Formatierungseinstellungen, Stile usw. und kann zum Erstellen mehrerer Dokumente mit derselben Formatierung verwendet werden.</td>
+					<td>+</td>
+					<td>+</td>
+					<td>+</td>
+				</tr>
+				<tr>
+					<td>FB2</td>
+					<td>Eine E-Book-Dateierweiterung, mit der Sie Bücher auf Ihrem Computer oder Mobilgerät lesen können</td>
+					<td>+</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td>ODT</td>
 					<td>Textverarbeitungsformat von OpenDocument, ein offener Standard für elektronische Dokumente</td>
+					<td>+</td>
+					<td>+</td>
+					<td>+</td>
+				</tr>
+				<tr>
+					<td>OTT</td>
+					<td>OpenDocument-Dokumentenvorlage<br />OpenDocument-Dateiformat für Dokumentenvorlagen. Eine OTT-Vorlage enthält Formatierungseinstellungen, Stile usw. und kann zum Erstellen mehrerer Dokumente mit derselben Formatierung verwendet werden.</td>
 					<td>+</td>
 					<td>+</td>
 					<td>+</td>
@@ -60,7 +81,14 @@
 				</tr>
 				<tr>
 					<td>PDF</td>
-					<td>Portable Document Format<br />Dateiformat, mit dem Dokumente unabhängig vom ursprünglichen Anwendungsprogramm, Betriebssystem und der Hardware originalgetreu wiedergegeben werden können</td>
+					<td>Portable Document Format<br />Dateiformat, mit dem Dokumente unabhängig vom ursprünglichen Anwendungsprogramm, Betriebssystem und der Hardware originalgetreu wiedergegeben werden können.</td>
+					<td>+</td>
+					<td></td>
+					<td>+</td>
+				</tr>
+				<tr>
+					<td>PDF/A</td>
+					<td>Portable Document Format / A<br />Eine ISO-standardisierte Version des Portable Document Format (PDF), die auf die Archivierung und Langzeitbewahrung elektronischer Dokumente spezialisiert ist.</td>
 					<td>+</td>
 					<td></td>
 					<td>+</td>
@@ -68,9 +96,9 @@
 				<tr>
 					<td>HTML</td>
 					<td>HyperText Markup Language<br />Hauptauszeichnungssprache für Webseiten</td>
-					<td></td>
-					<td></td>
 					<td>+</td>
+					<td>+</td>
+					<td>Online-Version</td>
 				</tr>
 				<tr>
 					<td>EPUB</td>
@@ -92,20 +120,23 @@
 					<td>+</td>
 					<td></td>
 					<td></td>
-				</tr><!--<tr>
-					<td>PPTX</td>
-					<td>Office Open XML Presentation<br />Zipped, XML-based file format developed by Microsoft for representing spreadsheets, charts, presentations, and word processing documents</td>
-					<td>+</td>
-					<td></td>
-					<td></td>
 				</tr>
-				<tr>
-					<td>PPT</td>
-					<td>File format used by Microsoft PowerPoint</td>
-					<td>+</td>
-					<td></td>
-					<td></td>
-				</tr>--></table>
+				<!--<tr>
+			<td>PPTX</td>
+			<td>Office Open XML Presentation<br />Zipped, XML-based file format developed by Microsoft for representing spreadsheets, charts, presentations, and word processing documents</td>
+			<td>+</td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>PPT</td>
+			<td>File format used by Microsoft PowerPoint</td>
+			<td>+</td>
+			<td></td>
+			<td></td>
+		</tr>-->
+			</table>
+			<p class="note"><b>Hinweis</b>: Die HTML/EPUB/MHT Dateiformate werden ohne Chromium ausgeführt und sind auf allen Plattformen verfügbar.</p>
 		</div>
 	</body>
 </html>

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<title>Copie/pegue sus datos, deshaga/rehaga sus acciones</title>
+		<title>Copie/pegue datos, deshaga/rehaga sus acciones</title>
 		<meta charset="utf-8" />
 		<meta name="description" content="Perform the basic operations with the presentation: copy, paste, undo, redo" />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
@@ -13,17 +13,17 @@
         <div class="search-field">
             <input id="search" class="searchBar" placeholder="Buscar" type="text" onkeypress="doSearch(event)">
         </div>
-			<h1>Copie/pegue sus datos, deshaga/rehaga sus acciones</h1>
-            <h3>Use operaciones de portapapeles básicas</h3>
+			<h1>Copie/pegue datos, deshaga/rehaga sus acciones</h1>
+            <h3>Use operaciones de portapapeles básico</h3>
 			<p>Para cortar, copiar y pegar los objetos seleccionados (diapositivas, párrafos de texto, autoformas) en su presentación o deshacer y reahecer sus acciones, use las opciones correspondientes del menú contextual, o los atajos de teclado, o los iconos correspondientes en la barra de herramientas superior:</p>
             <ul>
-                <li><b>Cortar</b> – seleccione un objeto y use la opción <b>Cortar</b> del menú contextual para borrar lo que ha seleccionado y enviarlo al portapapeles de su ordenador. Los datos eliminados pueden insertarse mas tarde a otro lugar de la misma presentación.</li>
-                <li><b>Copiar</b> – seleccione un objeto y use la opción <b>Copiar</b> del menú contextual o el icono <img alt="Icono copiar" src="../images/copy.png" /> <b>Copiar</b> en la barra de herramientas superior para copiarlo al portapapeles de su ordenador. El objeto copiado se puede copiar más adelante en otra parte de la misma presentación.</li>
-                <li><b>Pegar</b> – encuentre un lugar en su presentación donde quiera pegar el objeto anteriormente copiado y use la opción <b>Pegar</b> del menú contextual o el icono <img alt="Icono pegar" src="../images/paste.png" /> <b>Pegar</b> en la barra de herramientas superior. El objeto se insertará en la posición actual  de la posición del cursor. El objeto se puede copiar previamente de la misma presentación.</li>
+                <li><b>Cortar</b> – seleccione un objeto y use la opción <b>Cortar</b> del menú contextual para borrar lo que ha seleccionado y enviarlo al portapapeles de su ordenador. <span class="onlineDocumentFeatures">Los datos eliminados pueden insertarse mas tarde a otro lugar de la misma presentación.</span></li>
+                <li><b>Copiar</b> – seleccione un objeto y use la opción <b>Copiar</b> del menú contextual o el icono <img alt="Icono copiar" src="../images/copy.png" /> <b>Copiar</b> en la barra de herramientas superior para copiarlo al portapapeles de su ordenador. <span class="onlineDocumentFeatures">El objeto copiado se puede copiar más adelante en otra parte de la misma presentación.</span></li>
+                <li><b>Pegar</b> – encuentre un lugar en su presentación donde quiera pegar el objeto anteriormente copiado y use la opción <b>Pegar</b> del menú contextual o el icono <img alt="Icono pegar" src="../images/paste.png" /> <b>Pegar</b> en la barra de herramientas superior. El objeto se insertará en la posición actual  de la posición del cursor. <span class="onlineDocumentFeatures">El objeto se puede copiar previamente de la misma presentación.</span></li>
             </ul>    
-            <p>Para copiar o pegar datos de/en otra presentación u otro programa use las combinaciones de las teclas siguientes:</p>
+            <p><span class="onlineDocumentFeatures">En la <em>versión en línea</em>, las siguientes combinaciones de teclas solo se usan para copiar o pegar datos desde/hacia otro presentación o algún otro programa,</span> <span class="desktopDocumentFeatures">en la <em>versión de escritorio</em>, tanto los botones/menú correspondientes como las opciones de menú y combinaciones de teclas se pueden usar para cualquier operación de copiar/pegar:</span></p>
                     <ul>
-                        <li>La combinación de letras <b>Ctrl+C</b> para copiar;</li>
+                        <li>La combinación de las teclas <b>Ctrl+C</b> para copiar;</li>
                         <li>La combinación de las teclas <b>Ctrl+V</b> para pegar;</li>
                         <li>La combinación de las teclas <b>Ctrl+X</b> para cortar.</li>
                     </ul>
@@ -43,12 +43,13 @@
                 <li><em>Imagen</em> - permite pegar el texto como imagen para que no pueda ser editado.</li>
             </ul>
             <h3>Usar las operaciones Deshacer/Rehacer</h3>
-            <p>Para deshacer/rehacer operaciones, use los iconos correspondientes que estan disponibles en la barra de herramientas superior o los atajos de teclado:</p>
+            <p>Para realizar las operaciones de deshacer/rehacer, use los iconos correspondientes en la parte izquierda de la cabecera del editor o los atajos de teclado:</p>
             <ul>
-                <li><b>Deshacer</b> – use el icono <img alt="Icono Deshacer" src="../images/undo.png" /> <b>Deshacer</b> para deshacer la última operación que usted ha realizado.</li>
-                <li><b>Rehacer</b> – use el icono <b>Rehacer</b> <img alt="Icono Rehacer" src="../images/redo.png" /> para rehacer la última operación que usted ha realizado.<p>Usted también puede usar la combinación de las teclas <b>Ctrl+Z</b> para desahecer una acción o <b>Ctrl+Y</b> para rehacerla.</p>
+                <li><b>Deshacer</b> – use el icono <img alt="Icono deshacer" src="../images/undo.png" /> <b>Deshacer</b> para deshacer la última operación que realizó.</li>
+                <li><b>Rehacer</b> – use el icono <img alt="Icono rehacer" src="../images/redo.png" /> <b>Rehacer</b>  para rehacer la última operación que realizó.<p>Usted también puede usar la combinación de las teclas <b>Ctrl+Z</b> para desahecer una acción o <b>Ctrl+Y</b> para rehacerla.</p>
                 </li>
             </ul>
+            <p class="note"><b>Nota</b>: cuando co-edita una presentación en modo <b>Rápido</b> la posibilidad de <b>Rehacer</b> la última operación que se deshizo no está disponible.</p>
 			
 		</div>
 	</body>

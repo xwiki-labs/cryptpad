@@ -14,23 +14,29 @@
             <input id="search" class="searchBar" placeholder="Suche" type="text" onkeypress="doSearch(event)">
         </div>
 			<h1>Registerkarte Start</h1>
-            <p>Die Registerkarte <b>Start</b> wird standardmäßig geöffnet, wenn Sie ein beliebiges Dokument öffnen. Über diese Registerkarte können Sie Schriftart und Absätze formatieren. Auch einige andere Optionen sind hier verfügbar, wie Seriendruck, Farbschemata und Ansichtseinstellungen.</p>
-            <p><img alt="Registerkarte Start" src="../images/interface/hometab.png" /></p>
-            <p>Über diese Registerkarte können Sie:</p>
+            <p>Die Registerkarte <b>Start</b> wird standardmäßig geöffnet, wenn Sie ein beliebiges Dokument öffnen. Über diese Registerkarte können Sie Schriftart und Absätze formatieren. Auch einige andere Optionen sind hier verfügbar, wie <span class="onlineDocumentFeatures">Seriendruck und</span> Farbschemata.</p>
+            <div class="onlineDocumentFeatures">
+                <p>Dialogbox Online-Dokumenteneditor:</p>
+                <p><img alt="Registerkarte Start" src="../images/interface/hometab.png" /></p>
+            </div>
+            <div class="desktopDocumentFeatures">
+                <p>Dialogbox Desktop-Dokumenteneditor:</p>
+                <p><img alt="Registerkarte Start" src="../images/interface/desktop_hometab.png" /></p>
+            </div>
+            <p>Sie können:</p>
             <ul>
                 <li><a href="../UsageInstructions/FontTypeSizeColor.htm" onclick="onhyperlinkclick(this)">Schriftart, -größe und -farbe</a> anpassen,</li>
-                <li><a href="../UsageInstructions/DecorationStyles.htm" onclick="onhyperlinkclick(this)">Schriftzüge dekorieren und stylen</a>,</li>
+                <li><a href="../UsageInstructions/DecorationStyles.htm" onclick="onhyperlinkclick(this)">Dekostile</a> anwenden,</li>
                 <li>die <a href="../UsageInstructions/BackgroundColor.htm" onclick="onhyperlinkclick(this)">Hintergrundfarbe</a> für einen Absatz auswählen,</li>
                 <li>Aufzählungszeichen und nummerierte <a href="../UsageInstructions/CreateLists.htm" onclick="onhyperlinkclick(this)">Listen</a> erstellen,</li>
                 <li><a href="../UsageInstructions/ParagraphIndents.htm" onclick="onhyperlinkclick(this)">Absatzeinzüge</a> ändern,</li>
                 <li>den <a href="../UsageInstructions/LineSpacing.htm" onclick="onhyperlinkclick(this)">Zeilenabstand</a> in den Absätzen einstellen,</li>
                 <li>Ihren Text in der Zeile oder im Absatz <a href="../UsageInstructions/AlignText.htm" onclick="onhyperlinkclick(this)">ausrichten</a>,</li>
                 <li><a href="../UsageInstructions/NonprintingCharacters.htm" onclick="onhyperlinkclick(this)">Formatierungszeichen</a> ein- und ausblenden,</li>
-                <li> die Textformatierung <a href="../UsageInstructions/CopyClearFormatting.htm" onclick="onhyperlinkclick(this)">Kopieren/entfernen</a>,</li>
+                <li>die Textformatierung <a href="../UsageInstructions/CopyClearFormatting.htm" onclick="onhyperlinkclick(this)">kopieren/entfernen</a>,</li>
                 <li>das <a href="../UsageInstructions/ChangeColorScheme.htm" onclick="onhyperlinkclick(this)">Farbschema</a> ändern,</li>
-                <li><a href="../UsageInstructions/UseMailMerge.htm" onclick="onhyperlinkclick(this)">Seriendrucke</a> verwenden,</li>
-                <li><a href="../UsageInstructions/FormattingPresets.htm" onclick="onhyperlinkclick(this)">Stile</a> verwalten und</li>
-                <li><a href="../HelpfulHints/Navigation.htm" onclick="onhyperlinkclick(this)">Ansichtseinstellungen</a> anpassen und auf die <a href="../HelpfulHints/AdvancedSettings.htm" onclick="onhyperlinkclick(this)">Erweiterten Einstellungen des Dokumenteneditors</a> zugreifen.</li>
+                <li class="onlineDocumentFeatures"><a href="../UsageInstructions/UseMailMerge.htm" onclick="onhyperlinkclick(this)">Seriendruck</a> anwenden (nur in der <em>Online-Version</em> verfügbar,</li>
+                <li><a href="../UsageInstructions/FormattingPresets.htm" onclick="onhyperlinkclick(this)">Stile</a> verwalten.</li>
             </ul>
 		</div>
 	</body>

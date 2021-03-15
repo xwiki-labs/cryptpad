@@ -10,7 +10,7 @@ img
 {
 border: none;
 vertical-align: middle;
-max-width: 95%;
+max-width: 100%;
 }
 
 img.floatleft 
@@ -149,6 +149,7 @@ text-decoration: none;
 .search-field {
     display: block;
     float: right;
+    margin-top: 10px;
 }
 .search-field input {
     width: 250px;

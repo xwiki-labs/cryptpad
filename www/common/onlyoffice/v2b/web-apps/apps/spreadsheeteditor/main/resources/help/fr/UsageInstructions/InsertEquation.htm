@@ -3,7 +3,7 @@
 	<head>
 		<title>Insérer des équations</title>
 		<meta charset="utf-8" />
-		<meta name="description" content="Insert equations and mathematical symbols." />
+		<meta name="description" content="Insérer des équations et des opérateurs mathématiques." />
 		<link type="text/css" rel="stylesheet" href="../editor.css" />
         <script type="text/javascript" src="../callback.js"></script>
         <script type="text/javascript" src="../search/js/page-search.js"></script>
@@ -11,7 +11,7 @@
 	<body>
 		<div class="mainpart">
         <div class="search-field">
-            <input id="search" class="searchBar" placeholder="Recherche" type="text" onkeypress="doSearch(event)">
+            <input id="search" class="searchBar" placeholder="Rechercher" type="text" onkeypress="doSearch(event)">
         </div>
 			<h1>Insérer des équations</h1>
             <p><b>Spreadsheet Editor</b> vous permet de créer des équations à l'aide des modèles intégrés, de les éditer, d'insérer des caractères spéciaux (y compris des opérateurs mathématiques, des lettres grecques, des accents, etc.).</p>
@@ -28,7 +28,7 @@
             <h3>Entrer des valeurs</h3>
             <p>Le <b>point d'insertion</b> spécifie où le prochain caractère que vous entrez apparaîtra. Pour positionner le point d'insertion avec précision, cliquez dans un espace réservé et utilisez les flèches du clavier pour déplacer le point d'insertion d'un caractère vers la gauche/droite.</p><img alt="Équation éditée" src="../images/newslot.png" /><p>Une fois le point d'insertion positionné, vous pouvez remplir l'espace réservé :<ul>
                 <li>entrer la valeur numérique/littérale souhaitée à l'aide du clavier,</li>
-                <li>insérer un caractère spécial à l'aide de la palette <b>Symboles</b> dans le menu <img alt="Icône Équation" src="../images/insertequationicon.png" /> <b>Équation</b> de l'onglet <b>Insertion</b> de la barre d'outils supérieure,</li>
+                <li>insérer un caractère spécial à l'aide de la palette <B>Symboles</B> dans le menu <img alt="L'icône Équation" src="../images/insertequationicon.png" /> <BÉquation</B> sous l'onglet <B>Insertion</B> de la barre d'outils supérieure ou saisissez les à l'aide du clavier (consultez la description de l'option <a href="../UsageInstructions/MathAutoCorrect.htm" onclick="onhyperlinkclick(this)"><B>AutoMaths </B></a> ),</li>
                 <li>ajoutez un autre modèle d'équation à partir de la palette pour créer une équation imbriquée complexe. La taille de l'équation primaire sera automatiquement ajustée pour s'adapter à son contenu. La taille des éléments de l'équation imbriquée dépend de la taille de l'espace réservé de l'équation primaire, mais elle ne peut pas être inférieure à la taille de sous-indice.</li>                
             </ul>
             </p>
@@ -43,7 +43,7 @@
             <p>Lorsque vous entrez les valeurs des expressions mathématiques, vous n'avez pas besoin d'utiliser la <b>Barre d'espace</b> car les espaces entre les caractères et les signes des opérations sont définis automatiquement.</p>
             <p>Si l'équation est trop longue et ne tient pas en une seule ligne, le saut de ligne automatique se produit pendant que vous tapez. Vous pouvez également insérer un saut de ligne à une position spécifique en cliquant avec le bouton droit sur un opérateur mathématique et en sélectionnant l'option <b>Insérer un saut manuel</b> dans le menu. L'opérateur sélectionné va commencer une nouvelle ligne. Pour supprimer le saut de ligne manuel ajouté, cliquez avec le bouton droit sur l'opérateur mathématique qui commence une nouvelle ligne et sélectionnez l'option <b>Supprimer un saut manuel</b>.</p>
             <h3>Mise en forme des équations</h3>
-            <p>Par défaut, l'équation dans la zone de texte est centrée horizontalement et alignée verticalement au haut de la zone de texte. Pour modifier son alignement horizontal/vertical, placez le curseur dans la boîte d'équation (les bordures de la zone de texte seront affichées en pointillés) et utilisez les <a href="../UsageInstructions/AlignText.htm" onclick="onhyperlinkclick(this)">icônes correspondantes</a> dans l'onglet Accueil de la barre d'outils supérieure.</p>
+            <p>Par défaut, l'équation dans la zone de texte est centrée horizontalement et alignée verticalement au haut de la zone de texte. Pour modifier son alignement horizontal/vertical, placez le curseur dans la boîte d'équation (les bordures de la zone de texte seront affichées en pointillés) et utilisez les <a href="../UsageInstructions/AlignText.htm" onclick="onhyperlinkclick(this)">icônes correspondantes</a> de la barre d'outils supérieure.</p>
             <p>Pour augmenter ou diminuer la <b>taille de la police</b> d'équation, cliquez n'importe où dans la boîte d'équation et utilisez les boutons <img alt="Incrémenter la taille de la police" src="../images/larger.png" /> et <img alt="Décrémenter la taille de la police" src="../images/smaller.png" /> de l'onglet <b>Accueil</b> de la barre d'outils supérieure ou sélectionnez la taille de police nécessaire dans la liste. Tous les éléments d'équation changeront en conséquence.</p>
             <p>Les lettres de l'équation sont en italique par défaut. Si nécessaire, vous pouvez changer le <b>style de police</b> (<em>gras, italique, barré</em>) ou la <b>couleur</b> pour une équation entière ou une portion. Le style <em>souligné</em> peut être appliqué uniquement à l'équation entière et non aux caractères individuels. Sélectionnez la partie de l'équation voulue en cliquant et en faisant glisser. La partie sélectionnée sera surlignée en bleu. Utilisez ensuite les boutons nécessaires dans l'onglet <b>Accueil</b> de la barre d'outils supérieure pour formater la sélection. Par exemple, vous pouvez supprimer le format italique pour les mots ordinaires qui ne sont pas des variables ou des constantes.</p><img alt="Équation éditée" src="../images/formatastext.png" /><p>Pour modifier des éléments d'équation, vous pouvez également utiliser les <b>options du menu contextuel</b> :</p>
             <ul><li>Pour modifier le format des <em>Fractions</em>, vous pouvez cliquer sur une fraction avec le bouton droit de la souris et sélectionner l'option <b>Changer en fraction en biais/linéaire/empilée</b> dans le menu (les options disponibles varient en fonction du type de fraction sélectionné). <!--The <b>Remove/Add fraction bar</b> option is also available for stacked fractions.--></li>

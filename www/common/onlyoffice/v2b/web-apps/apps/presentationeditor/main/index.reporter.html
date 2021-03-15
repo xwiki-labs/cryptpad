@@ -20,164 +20,120 @@
             overflow: hidden;
             border: none;
             background-color: #f4f4f4;
-            z-index: 100;
+            z-index: 10000;
         }
 
-        .loader-page {
+        .loadmask > .brendpanel {
             width: 100%;
-            height: 170px;
-            bottom: 42%;
-            position: absolute;
-            text-align: center;
-            line-height: 10px;
+            height: 56px;
+            background: #aa5252;
         }
 
-        .loader-logo {
-            max-height: 160px;
-            margin-bottom: 10px;
+        .loadmask > .brendpanel > div {
+            display: flex;
+            align-items: center;
         }
 
-        .loader-page-romb {
-            width: 40px;
-            display: inline-block;
+        .loadmask > .brendpanel .spacer {
+            margin-left: auto;
         }
 
-        .loader-page-text {
+        .loadmask > .brendpanel .circle {
+            vertical-align: middle;
+            width: 20px;
+            height: 20px;
+            border-radius: 12px;
+            margin: 4px 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loadmask > .brendpanel .rect {
+            vertical-align: middle;
+            width: 50px;
+            height: 12px;
+            border-radius: 3px;
+            margin: 0 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .loadmask > .placeholder {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            margin: 0 100px;
+        }
+
+        .loadmask > .placeholder .slide-h {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+            max-width: 1350px;
             width: 100%;
-            bottom: 42%;
+        }
+        .loadmask > .placeholder .slide-v {
+            display: flex;
+            position: relative;
+            flex-direction: column;
+            padding-bottom: 80%;
+        }
+
+        .loadmask > .placeholder .slide-container {
             position: absolute;
-            text-align: center;
-            color: #888;
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            line-height: 20px;
+            height: 100%;
+            width: 100%;
+            background: #fbfbfb;
+            border: 1px solid #dfdfdf;
+
+            -webkit-animation: flickerAnimation 2s infinite ease-in-out;
+            -moz-animation: flickerAnimation 2s infinite ease-in-out;
+            -o-animation: flickerAnimation 2s infinite ease-in-out;
+            animation: flickerAnimation 2s infinite ease-in-out;
         }
 
-        .loader-page-text-loading {
-            font-size: 14px;
-        }
-
-        .loader-page-text-customer {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .romb {
-            width: 40px;
-            height: 40px;
-            -webkit-transform: rotate(135deg) skew(20deg, 20deg);
-            -moz-transform: rotate(135deg) skew(20deg, 20deg);
-            -ms-transform: rotate(135deg) skew(20deg, 20deg);
-            -o-transform: rotate(135deg) skew(20deg, 20deg);
-            position: absolute;
-            background: red;
+        .loadmask > .placeholder .slide-container > .line {
+            height: 20%;
+            margin: 0 120px;
             border-radius: 6px;
-            -webkit-animation: movedown 3s infinite ease;
-            -moz-animation: movedown 3s infinite ease;
-            -ms-animation: movedown 3s infinite ease;
-            -o-animation: movedown 3s infinite ease;
-            animation: movedown 3s infinite ease;
+            background: #f5f5f5;
         }
 
-        #blue {
-            z-index: 3;
-            background: #55bce6;
-            -webkit-animation-name: blue;
-            -moz-animation-name: blue;
-            -ms-animation-name: blue;
-            -o-animation-name: blue;
-            animation-name: blue;
+        .loadmask > .placeholder .slide-container > .line.empty {
+            background: transparent;
         }
 
-        #red {
-            z-index:1;
-            background: #de7a59;
-            -webkit-animation-name: red;
-            -moz-animation-name: red;
-            -ms-animation-name: red;
-            -o-animation-name: red;
-            animation-name: red;
+        .loadmask > .placeholder .slide-container > .line:nth-child(1) {
+            height: 30%;
+            margin: 80px 80px 0;
         }
 
-        #green {
-            z-index: 2;
-            background: #a1cb5c;
-            -webkit-animation-name: green;
-            -moz-animation-name: green;
-            -ms-animation-name: green;
-            -o-animation-name: green;
-            animation-name: green;
+        @keyframes flickerAnimation {
+            0%   { opacity:1; }
+            50%  { opacity:0.3; }
+            100% { opacity:1; }
         }
-
-        @-webkit-keyframes red {
-              0%    { top:120px; background: #de7a59; }
-             10%    { top:120px; background: #F2CBBF; }
-             14%    { background: #f4f4f4; top:120px; }
-             15%    { background: #f4f4f4; top:0;}
-             20%    { background: #E6E4E4; }
-             30%    { background: #D2D2D2; }
-             40%    { top:120px; }
-            100%    { top:120px; background: #de7a59; }
+        @-o-keyframes flickerAnimation{
+            0%   { opacity:1; }
+            50%  { opacity:0.3; }
+            100% { opacity:1; }
         }
-
-        @keyframes red {
-              0%    { top:120px; background: #de7a59; }
-             10%    { top:120px; background: #F2CBBF; }
-             14%    { background: #f4f4f4; top:120px; }
-             15%    { background: #f4f4f4; top:0; }
-             20%    { background: #E6E4E4; }
-             30%    { background: #D2D2D2; }
-             40%    { top:120px; }
-            100%    { top:120px; background: #de7a59; }
+        @-moz-keyframes flickerAnimation{
+            0%   { opacity:1; }
+            50%  { opacity:0.3; }
+            100% { opacity:1; }
         }
-
-        @-webkit-keyframes green {
-              0%    { top:110px; background: #a1cb5c; opacity:1; }
-             10%    { top:110px; background: #CBE0AC; opacity:1; }
-             14%    { background: #f4f4f4; top:110px; opacity:1; }
-             15%    { background: #f4f4f4; top:0; opacity:1; }
-             20%    { background: #f4f4f4; top:0; opacity:0; }
-             25%    { background: #EFEFEF; top:0; opacity:1; }
-             30%    { background:#E6E4E4; }
-             70%    { top:110px; }
-            100%    { top:110px; background: #a1cb5c; }
-        }
-
-        @keyframes green {
-              0%    { top:110px; background: #a1cb5c; opacity:1; }
-             10%    { top:110px; background: #CBE0AC; opacity:1; }
-             14%    { background: #f4f4f4; top:110px; opacity:1; }
-             15%    { background: #f4f4f4; top:0; opacity:1; }
-             20%    { background: #f4f4f4; top:0; opacity:0; }
-             25%    { background: #EFEFEF; top:0; opacity:1; }
-             30%    { background:#E6E4E4; }
-             70%    { top:110px; }
-            100%    { top:110px; background: #a1cb5c; }
-        }
-
-        @-webkit-keyframes blue {
-              0%    { top:100px; background: #55bce6; opacity:1; }
-             10%    { top:100px; background: #BFE8F8; opacity:1; }
-             14%    { background: #f4f4f4; top:100px; opacity:1; }
-             15%    { background: #f4f4f4; top:0; opacity:1; }
-             20%    { background: #f4f4f4; top:0; opacity:0; }
-             25%    { background: #f4f4f4; top:0; opacity:0; }
-             45%    { background: #EFEFEF; top:0; opacity:0.2; }
-            100%    { top:100px; background: #55bce6; }
-        }
-
-        @keyframes blue {
-              0%    { top:100px; background: #55bce6; opacity:1; }
-             10%    { top:100px; background: #BFE8F8; opacity:1; }
-             14%    { background: #f4f4f4; top:100px; opacity:1; }
-             15%    { background: #f4f4f4; top:0; opacity:1; }
-             20%    { background: #f4f4f4; top:0; opacity:0; }
-             25%    { background: #f4f4f4; top:0; opacity:0; }
-             45%    { background: #EFEFEF; top:0; opacity:0.2; }
-            100%    { top:100px; background: #55bce6; }
+        @-webkit-keyframes flickerAnimation{
+            0%   { opacity:1; }
+            50%  { opacity:0.3; }
+            100% { opacity:1; }
         }
     </style>
 
     <script>
+        // don't add zoom for mobile devices
+        if (!(/android|avantgo|playbook|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od|ad)|iris|kindle|lge |maemo|midp|mmp|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent || navigator.vendor || window.opera)))
+            document.getElementsByTagName('html')[0].setAttribute('style', 'zoom: ' + 1 / (window.devicePixelRatio < 2 ? window.devicePixelRatio : window.devicePixelRatio / 2) + ';');
+
         var userAgent = navigator.userAgent.toLowerCase(),
             check = function(regex){ return regex.test(userAgent); },
             stopLoading = false;
@@ -219,52 +175,23 @@
 
         var params = getUrlParams(),
             lang = (params["lang"] || 'en').split(/[\-\_]/)[0],
-            customer = params["customer"] ? ('<div class="loader-page-text-customer">' + encodeUrlParam(params["customer"]) + '</div>') : '',
-            margin = (customer !== '') ? 50 : 20,
-            loading = 'Loading...',
-            presenter = 'Presenter View',
-            logo = params["logo"] ? ((params["logo"] !== 'none') ? ('<img src="' + encodeUrlParam(params["logo"]) + '" class="loader-logo" />') : '') : null;
+            presenter = 'Presenter View';
 
         window.frameEditorId = params["frameEditorId"];
+        window.parentOrigin = params["parentOrigin"];
 
-        if ( lang == 'bg') { presenter = 'Изглед на презентатора'; loading = 'Зареждане...';}
-        else if ( lang == 'cs') { presenter = 'Zobrazení přednášejícího'; loading = 'Nahrávám...';}
-        else if ( lang == 'de') { presenter = 'Referentenansicht'; loading = 'Ladevorgang...';}
-        else if ( lang == 'es') { presenter = 'Vista del presentador'; loading = 'Cargando...';}
-        else if ( lang == 'fr') { presenter = 'Mode présentateur'; loading = 'Chargement en cours...';}
-        else if ( lang == 'it') { presenter = 'Visualizzazione del presenter'; loading = 'Caricamento in corso...';}
-        else if ( lang == 'pl') { presenter = 'Widok Prezentera'; loading = 'Ładowanie...';}
-        else if ( lang == 'pt') { presenter = 'Vista de apresentador'; loading = 'Carregando...';}
-        else if ( lang == 'ru') { presenter = 'Режим докладчика'; loading = 'Загрузка...';}
-        else if ( lang == 'sk') { presenter = 'Režim prezentácie'; loading = 'Nahrávam...';}
-        else if ( lang == 'sl') { loading = 'Nalaganje...';}
+        if ( lang == 'bg') { presenter = 'Изглед на презентатора';}
+        else if ( lang == 'cs') { presenter = 'Zobrazení přednášejícího';}
+        else if ( lang == 'de') { presenter = 'Referentenansicht';}
+        else if ( lang == 'es') { presenter = 'Vista del presentador';}
+        else if ( lang == 'fr') { presenter = 'Mode présentateur';}
+        else if ( lang == 'it') { presenter = 'Visualizzazione del presenter';}
+        else if ( lang == 'pl') { presenter = 'Widok Prezentera';}
+        else if ( lang == 'pt') { presenter = 'Vista de apresentador';}
+        else if ( lang == 'ru') { presenter = 'Режим докладчика';}
+        else if ( lang == 'sk') { presenter = 'Režim prezentácie';}
         else if ( lang == 'zh') { presenter = '演示者视图';}
-        else if ( lang == 'tr') { loading = 'Yükleniyor...';}
-        else if ( lang == 'hu') loading = 'Betöltés...';
-        else if ( lang == 'ja') loading = '読み込み中...';
-        else if ( lang == 'ko') loading = '로드 중...';
-        else if ( lang == 'lv') loading = 'Ieladēšana ...';
-        else if ( lang == 'nl') loading = 'Laden...';
-        else if ( lang == 'uk') loading = 'Завантаження...';
-        else if ( lang == 'vi') loading = 'Đang tải...';
-        else if ( lang == 'zh') loading = '加载中...';
         window.document.title = presenter;
-
-        if (!stopLoading)
-            document.write(
-                '<div id="loading-mask" class="loadmask">' +
-                        '<div class="loader-page" style="margin-bottom: ' + margin + 'px;' + ((logo!==null) ? 'height: auto;' : '') + '">' +
-                            ((logo!==null) ? logo :
-                            '<div class="loader-page-romb">' +
-                                '<div class="romb" id="blue"></div>' +
-                                '<div class="romb" id="green"></div>' +
-                                '<div class="romb" id="red"></div>' +
-                            '</div>') +
-                        '</div>' +
-                        '<div class="loader-page-text">' +  customer +
-                            '<div class="loader-page-text-loading">' + loading + '</div>' +
-                        '</div>' +
-                '</div>');
     </script>
 
     <style>
@@ -274,6 +201,14 @@
     </style>
 </head>
 <body>
+    <div id="loading-mask" class="loadmask"><div class="placeholder"><div class="slide-h"><div class="slide-v"><div class="slide-container"><div class="line"></div><div class="line empty"></div><div class="line"></div></div></div></div></div></div>
+    <div id="viewport"></div>
+
+    <script>
+        if (stopLoading) {
+            document.body.removeChild(document.getElementById('loading-mask'));
+        }
+    </script>
 
     <script>
         window.requireTimeourError = function(){

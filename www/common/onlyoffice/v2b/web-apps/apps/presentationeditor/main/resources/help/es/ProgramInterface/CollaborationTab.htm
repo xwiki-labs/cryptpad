@@ -14,14 +14,21 @@
             <input id="search" class="searchBar" placeholder="Buscar" type="text" onkeypress="doSearch(event)">
         </div>
 			<h1>Pestaña de colaboración</h1>
-            <p>La pestaña de <b>Colaboración</b> permite organizar el trabajo colaborativo en la presentación: compartir el archivo, seleccionar un modo de co-edición, gestionar comentarios.</p>
-            <p><img alt="Pestaña de colaboración" src="../images/interface/collaborationtab.png" /></p>
-            <p>Usando esta pestaña, usted podrá:</p>
+            <p>La pestaña <b>Colaboración</b> permite organizar el trabajo colaborativo en la presentación. <span class="onlineDocumentFeatures">En la <em>versión en línea</em>, puede compartir el archivo, seleccionar un modo de co-edición y gestionar los comentarios.</span> <span class="desktopDocumentFeatures">En la <em>versión de escritorio</em>, puede gestionar los comentarios.</span></p>
+            <div class="onlineDocumentFeatures">
+                <p>Ventana del editor de presentaciones en línea:</p>
+                <p><img alt="Pestaña de colaboración" src="../images/interface/collaborationtab.png" /></p>
+            </div>
+            <div class="desktopDocumentFeatures">
+                <p>Ventana del editor de presentaciones de escritorio:</p>
+                <p><img alt="Pestaña de colaboración" src="../images/interface/desktop_collaborationtab.png" /></p>
+            </div>
+            <p>Al usar esta pestaña podrás:</p>
             <ul>
-                <li>especificar <a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">configuraciones de compartir</a>,</li>
-                <li>cambiar entre los modos de co-edición<a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Estricto y Rápido</a>,</li>
+                <li class="onlineDocumentFeatures">especificar los <a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">ajustes de uso compartido</a> (disponible solamente en la <em>versión en línea</em>),</li>
+                <li class="onlineDocumentFeatures">cambiar entre los modos de co-edición <a href="../HelpfulHints/CollaborativeEditing.htm" onclick="onhyperlinkclick(this)">Estricto y Rápido</a> (disponible solamente en la <em>versión en línea</em>),</li>
                 <li>añadir <a href="../HelpfulHints/CollaborativeEditing.htm#comments" onclick="onhyperlinkclick(this)">comentarios</a> a la presentación,</li>
-                <li>Abrir el panel <a href="../HelpfulHints/CollaborativeEditing.htm#chat" onclick="onhyperlinkclick(this)">Chat</a></li>
+                <li class="onlineDocumentFeatures">abrir el panel <a href="../HelpfulHints/CollaborativeEditing.htm#chat" onclick="onhyperlinkclick(this)">Chat</a> (disponible solamente en la <em>versión en línea</em>),</li>
             </ul>
 		</div>
 	</body>

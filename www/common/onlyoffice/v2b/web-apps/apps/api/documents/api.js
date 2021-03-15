@@ -1,8 +1,11 @@
-/**
- * Copyright (c) Ascensio System SIA 2013. All rights reserved
+/*
+ * Copyright (C) Ascensio System SIA 2012-2021. All rights reserved
  *
- * http://www.onlyoffice.com
+ * https://www.onlyoffice.com/ 
+ *
+ * Version: 0.0.0 (build:0)
  */
+
 
 ;(function(DocsAPI, window, document, undefined) {
 
@@ -11,10 +14,11 @@
         # Full #
 
         config = {
-            type: 'desktop or mobile',
+            type: 'desktop or mobile or embedded',
             width: '100% by default',
             height: '100% by default',
-            documentType: 'text' | 'spreadsheet' | 'presentation',
+            documentType: 'word' | 'cell' | 'slide',// deprecate 'text' | 'spreadsheet' | 'presentation',
+            token: <string> encrypted signature
             document: {
                 title: 'document title',
                 url: 'document url'
@@ -43,15 +47,20 @@
                     reader: <can view in readable mode>,
                     review: <can review>, // default = edit
                     print: <can print>, // default = true
-                    rename: <can rename>, // default = false
-                    changeHistory: <can change history>, // default = false
                     comment: <can comment in view mode> // default = edit,
                     modifyFilter: <can add, remove and save filter in the spreadsheet> // default = true
                     modifyContentControl: <can modify content controls in documenteditor> // default = true
-                   fillForms:  <can edit forms in view mode> // default = edit || review
+                    fillForms:  <can edit forms in view mode> // default = edit || review,
+                    copy: <can copy data> // default = true
                 }
             },
             editorConfig: {
+                actionLink: { // open file and scroll to data, used with onMakeActionLink or the onRequestSendNotify event
+                    action: {
+                        type: "bookmark", // or type="comment"
+                        data: <bookmark name> // or comment id
+                    }
+                },
                 mode: 'view or edit',
                 lang: <language code>,
                 location: <location>,
@@ -69,20 +78,21 @@
 
                 user: {
                     id: 'user id',
-                    name: 'user name'
+                    name: 'user name',
+                    group: 'group name' // for customization.reviewPermissions parameter
                 },
                 recent: [
                     {
                         title: 'document title',
                         url: 'document url',
-                        folder: 'path to document'
+                        folder: 'path to document',
                     },
                     ...
                 ],
                 templates: [
                     {
-                        name: 'template name',
-                        icon: 'template icon url',
+                        title: 'template name', // name - is deprecated
+                        image: 'template icon url',
                         url: 'http://...'
                     },
                     ...
@@ -109,7 +119,13 @@
                     goback: {
                         url: 'http://...',
                         text: 'Go to London',
-                        blank: true
+                        blank: true,
+                        requestClose: false // if true - goback send onRequestClose event instead opening url
+                    },
+                    reviewPermissions: {
+                        "Group1": ["Group2"], // users from Group1 can accept/reject review changes made by users from Group2
+                        "Group2": ["Group1", "Group2"] // users from Group2 can accept/reject review changes made by users from Group1 and Group2
+                        "Group3": [""] // users from Group3 can accept/reject review changes made by users without a group
                     },
                     chat: true,
                     comments: true,
@@ -128,7 +144,15 @@
                     compactHeader: false,
                     toolbarNoTabs: false,
                     toolbarHideFileName: false,
-                    reviewDisplay: 'original'
+                    reviewDisplay: 'original',
+                    spellcheck: true,
+                    compatibleFeatures: false,
+                    unit: 'cm' // cm, pt, inch,
+                    mentionShare : true // customize tooltip for mention,
+                    macros: true // can run macros in document
+                    plugins: true // can run plugins in document
+                    macrosMode: 'warn' // warn about automatic macros, 'enable', 'disable', 'warn',
+                    trackChanges: undefined // true/false - open editor with track changes mode on/off
                 },
                 plugins: {
                     autostart: ['asc.{FFE1F462-1EA2-4391-990D-4CC84940B754}'],
@@ -142,9 +166,30 @@
             },
             events: {
                 'onAppReady': <application ready callback>,
-                'onBack': <back to folder callback>,
                 'onDocumentStateChange': <document state changed callback>
                 'onDocumentReady': <document ready callback>
+                'onRequestEditRights': <request rights for switching from view to edit>,
+                'onRequestHistory': <request version history>,// must call refreshHistory method
+                'onRequestHistoryData': <request version data>,// must call setHistoryData method
+                'onRequestRestore': <try to restore selected version>,
+                'onRequestHistoryClose': <request closing history>,
+                'onError': <error callback>,
+                'onWarning': <warning callback>,
+                'onInfo': <document open callback>,// send view or edit mode
+                'onOutdatedVersion': <outdated version callback>,// send when  previous version is opened
+                'onDownloadAs': <download as callback>,// send url of downloaded file as a response for downloadAs method
+                'onRequestSaveAs': <try to save copy of the document>,
+                'onCollaborativeChanges': <co-editing changes callback>,// send when other user co-edit document
+                'onRequestRename': <try to rename document>,
+                'onMetaChange': // send when meta information changed
+                'onRequestClose': <request close editor>,
+                'onMakeActionLink': <request link to document with bookmark, comment...>,// must call setActionLink method
+                'onRequestUsers': <request users list for mentions>,// must call setUsers method
+                'onRequestSendNotify': //send when user is mentioned in a comment,
+                'onRequestInsertImage': <try to insert image>,// must call insertImage method
+                'onRequestCompareFile': <request file to compare>,// must call setRevisedFile method
+                'onRequestSharingSettings': <request sharing settings>,// must call setSharingSettings method
+                'onRequestCreateNew': <try to create document>,
             }
         }
 
@@ -154,7 +199,7 @@
             type: 'embedded',
             width: '100% by default',
             height: '100% by default',
-            documentType: 'text' | 'spreadsheet' | 'presentation',
+            documentType: 'word' | 'cell' | 'slide',// deprecate 'text' | 'spreadsheet' | 'presentation',
             document: {
                 title: 'document title',
                 url: 'document url',
@@ -205,7 +250,11 @@
         _config.editorConfig.canRequestSaveAs = _config.events && !!_config.events.onRequestSaveAs;
         _config.editorConfig.canRequestInsertImage = _config.events && !!_config.events.onRequestInsertImage;
         _config.editorConfig.canRequestMailMergeRecipients = _config.events && !!_config.events.onRequestMailMergeRecipients;
+        _config.editorConfig.canRequestCompareFile = _config.events && !!_config.events.onRequestCompareFile;
+        _config.editorConfig.canRequestSharingSettings = _config.events && !!_config.events.onRequestSharingSettings;
+        _config.editorConfig.canRequestCreateNew = _config.events && !!_config.events.onRequestCreateNew;
         _config.frameEditorId = placeholderId;
+        _config.parentOrigin = window.location.origin;
 
         var onMouseUp = function (evt) {
             _processMouse(evt);
@@ -286,6 +335,8 @@
             if ( msg ) {
                 if ( msg.type === "onExternalPluginMessage" ) {
                     _sendCommand(msg);
+                } else if (msg.type === "onExternalPluginMessageCallback") {
+                    postMessage(window.parent, msg);
                 } else
                 if ( msg.frameEditorId == placeholderId ) {
                     var events = _config.events || {},
@@ -321,8 +372,14 @@
                         'text': 'docx',
                         'text-pdf': 'pdf',
                         'spreadsheet': 'xlsx',
-                        'presentation': 'pptx'
+                        'presentation': 'pptx',
+                        'word': 'docx',
+                        'cell': 'xlsx',
+                        'slide': 'pptx'
                     }, app;
+
+                if (_config.documentType=='text' || _config.documentType=='spreadsheet' ||_config.documentType=='presentation')
+                    console.warn("The \"documentType\" parameter for the config object must take one of the values word/cell/slide.");
 
                 if (typeof _config.documentType === 'string' && _config.documentType != '') {
                     app = appMap[_config.documentType.toLowerCase()];
@@ -335,15 +392,16 @@
                 }
 
                 if (typeof _config.document.fileType === 'string' && _config.document.fileType != '') {
-                    var type = /^(?:(xls|xlsx|ods|csv|xlst|xlsy|gsheet|xlsm|xlt|xltm|xltx|fods|ots)|(pps|ppsx|ppt|pptx|odp|pptt|ppty|gslides|pot|potm|potx|ppsm|pptm|fodp|otp)|(doc|docx|doct|odt|gdoc|txt|rtf|pdf|mht|htm|html|epub|djvu|xps|docm|dot|dotm|dotx|fodt|ott))$/
+                    _config.document.fileType = _config.document.fileType.toLowerCase();
+                    var type = /^(?:(xls|xlsx|ods|csv|xlst|xlsy|gsheet|xlsm|xlt|xltm|xltx|fods|ots)|(pps|ppsx|ppt|pptx|odp|pptt|ppty|gslides|pot|potm|potx|ppsm|pptm|fodp|otp)|(doc|docx|doct|odt|gdoc|txt|rtf|pdf|mht|htm|html|epub|djvu|xps|docm|dot|dotm|dotx|fodt|ott|fb2))$/
                                     .exec(_config.document.fileType);
                     if (!type) {
                         window.alert("The \"document.fileType\" parameter for the config object is invalid. Please correct it.");
                         return false;
                     } else if (typeof _config.documentType !== 'string' || _config.documentType == ''){
-                        if (typeof type[1] === 'string') _config.documentType = 'spreadsheet'; else
-                        if (typeof type[2] === 'string') _config.documentType = 'presentation'; else
-                        if (typeof type[3] === 'string') _config.documentType = 'text';
+                        if (typeof type[1] === 'string') _config.documentType = 'cell'; else
+                        if (typeof type[2] === 'string') _config.documentType = 'slide'; else
+                        if (typeof type[3] === 'string') _config.documentType = 'word';
                     }
                 }
 
@@ -377,8 +435,6 @@
                     if (!_config.editorConfig.customization) _config.editorConfig.customization = {};
                     _config.editorConfig.customization.about = false;
                     _config.editorConfig.customization.compactHeader = false;
-
-                    if ( window.AscDesktopEditor ) window.AscDesktopEditor.execCommand('webapps:events', 'loading');
                 }
             }
         })();
@@ -388,6 +444,10 @@
 
         if (target && _checkConfigParams()) {
             iframe = createIframe(_config);
+            if (iframe.src) {
+                var pathArray = iframe.src.split('/');
+                this.frameOrigin = pathArray[0] + '//' + pathArray[2];
+            }
             target.parentNode && target.parentNode.replaceChild(iframe, target);
             var _msgDispatcher = new MessageDispatcher(_onMessage, this);
         }
@@ -574,6 +634,13 @@
             });
         };
 
+        var _setRevisedFile = function(data) {
+            _sendCommand({
+                command: 'setRevisedFile',
+                data: data
+            });
+        };
+
         var _processMouse = function(evt) {
             var r = iframe.getBoundingClientRect();
             var data = {
@@ -618,7 +685,8 @@
             showSharingSettings : _showSharingSettings,
             setSharingSettings  : _setSharingSettings,
             insertImage         : _insertImage,
-            setMailMergeRecipients: _setMailMergeRecipients
+            setMailMergeRecipients: _setMailMergeRecipients,
+            setRevisedFile      : _setRevisedFile
         }
     };
 
@@ -668,7 +736,7 @@
 
         var _onMessage = function(msg) {
             // TODO: check message origin
-            if (msg && window.JSON) {
+            if (msg && window.JSON && _scope.frameOrigin==msg.origin ) {
 
                 try {
                     var msg = window.JSON.parse(msg.data);
@@ -713,9 +781,12 @@
                 'text': 'documenteditor',
                 'text-pdf': 'documenteditor',
                 'spreadsheet': 'spreadsheeteditor',
-                'presentation': 'presentationeditor'
+                'presentation': 'presentationeditor',
+                'word': 'documenteditor',
+                'cell': 'spreadsheeteditor',
+                'slide': 'presentationeditor'
             },
-            app = appMap['text'];
+            app = appMap['word'];
 
         if (typeof config.documentType === 'string') {
             app = appMap[config.documentType.toLowerCase()];
@@ -724,19 +795,35 @@
             var type = /^(?:(xls|xlsx|ods|csv|xlst|xlsy|gsheet|xlsm|xlt|xltm|xltx|fods|ots)|(pps|ppsx|ppt|pptx|odp|pptt|ppty|gslides|pot|potm|potx|ppsm|pptm|fodp|otp))$/
                             .exec(config.document.fileType);
             if (type) {
-                if (typeof type[1] === 'string') app = appMap['spreadsheet']; else
-                if (typeof type[2] === 'string') app = appMap['presentation'];
+                if (typeof type[1] === 'string') app = appMap['cell']; else
+                if (typeof type[2] === 'string') app = appMap['slide'];
             }
         }
 
+        var userAgent = navigator.userAgent.toLowerCase(),
+            check = function(regex){ return regex.test(userAgent); },
+            isIE = !check(/opera/) && (check(/msie/) || check(/trident/) || check(/edge/)),
+            isChrome = !isIE && check(/\bchrome\b/),
+            isSafari_mobile = !isIE && !isChrome && check(/safari/) && (navigator.maxTouchPoints>0);
+
         path += app + "/";
-        path += config.type === "mobile"
+        path += (config.type === "mobile" || isSafari_mobile)
             ? "mobile"
             : config.type === "embedded"
                 ? "embed"
                 : "main";
-        path += "/index.html";
 
+        var index = "/index.html";
+        if (config.editorConfig) {
+            var customization = config.editorConfig.customization;
+            if ( typeof(customization) == 'object' && ( customization.toolbarNoTabs ||
+                                                        (config.editorConfig.targetApp!=='desktop') && (customization.loaderName || customization.loaderLogo))) {
+                index = "/index_loader.html";
+            } else if (config.editorConfig.mode == 'editdiagram' || config.editorConfig.mode == 'editmerge')
+                index = "/index_internal.html";
+
+        }
+        path += index;
         return path;
     }
 
@@ -753,16 +840,36 @@
                 params += "&customer=ONLYOFFICE";
             if ( (typeof(config.editorConfig.customization) == 'object') && config.editorConfig.customization.loaderLogo) {
                 if (config.editorConfig.customization.loaderLogo !== '') params += "&logo=" + config.editorConfig.customization.loaderLogo;
+            } else if ( (typeof(config.editorConfig.customization) == 'object') && config.editorConfig.customization.logo) {
+                if (config.type=='embedded' && config.editorConfig.customization.logo.imageEmbedded)
+                    params += "&headerlogo=" + config.editorConfig.customization.logo.imageEmbedded;
+                else if (config.type!='embedded' && config.editorConfig.customization.logo.image)
+                    params += "&headerlogo=" + config.editorConfig.customization.logo.image;
             }
         }
 
         if (window.APP && window.APP.urlArgs) {
             params += "&"+ window.APP.urlArgs;
         }
+        if (config.editorConfig && (config.editorConfig.mode == 'editdiagram' || config.editorConfig.mode == 'editmerge'))
+            params += "&internal=true";
 
         if (config.frameEditorId)
             params += "&frameEditorId=" + config.frameEditorId;
-        
+
+        if (config.editorConfig && config.editorConfig.mode == 'view' ||
+            config.document && config.document.permissions && (config.document.permissions.edit === false && !config.document.permissions.review ))
+            params += "&mode=view";
+
+        if (config.editorConfig && config.editorConfig.customization && !!config.editorConfig.customization.compactHeader)
+            params += "&compact=true";
+
+        if (config.editorConfig && config.editorConfig.customization && (config.editorConfig.customization.toolbar===false))
+            params += "&toolbar=false";
+
+        if (config.parentOrigin)
+            params += "&parentOrigin=" + config.parentOrigin;
+
         return params;
     }
 
@@ -778,7 +885,8 @@
         iframe.allowFullscreen = true;
         iframe.setAttribute("allowfullscreen",""); // for IE11
         iframe.setAttribute("onmousewheel",""); // for Safari on Mac
-		
+        iframe.setAttribute("allow", "autoplay; camera; microphone; display-capture");
+        
 		if (config.type == "mobile")
 		{
 			iframe.style.position = "fixed";

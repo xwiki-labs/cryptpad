@@ -18,17 +18,17 @@
 			<p>You can perform simple calculations on data in table cells by adding formulas. To insert a formula into a table cell,</p>
 			<ol>
 				<li>place the cursor within the cell where you want to display the result,</li>
-                <li>click the <b>Add formula</b> button at the right sidebar,</li>
-				<li>in the <b>Formula Settings</b> window that opens, enter the necessary formula into the <b>Formula</b> field. 
-                    <p>You can enter a needed formula manually using the common mathematical operators (+, -, *, /), e.g. <em>=A1*B2</em> or use the <b>Paste Function</b> drop-down list to select one of the embedded functions, e.g. <em>=PRODUCT(A1,B2)</em>.</p>
+                <li>click the <b>Add formula</b> button on the right sidebar,</li>
+				<li>in the opened <b>Formula Settings</b> window, enter the required formula into the <b>Formula</b> field. 
+                    <p>You can enter the required formula manually using the common mathematical operators (+, -, *, /), e.g. <em>=A1*B2</em> or use the <b>Paste Function</b> drop-down list to select one of the embedded functions, e.g. <em>=PRODUCT(A1,B2)</em>.</p>
                 <p><img alt="Add formula" src="../images/formula_settings.png" /></p>					
 				</li>
-                <li>manually specify necessary arguments within the parentheses in the <b>Formula</b> field. If the function requires several arguments, they must be separated by commas.</li>
+                <li>manually specify the required arguments within the parentheses in the <b>Formula</b> field. If the function requires several arguments, they must be separated by commas.</li>
                 <li>use the <b>Number Format</b> drop-down list if you want to display the result in a certain number format,</li>
 				<li>click <b>OK</b>.</li>
 			</ol>
             <p>The result will be displayed in the selected cell. </p>
-            <p>To edit the added formula, select the result in the cell and click the <b>Add formula</b> button at the right sidebar, make the necessary changes in the <b>Formula Settings</b> window and click <b>OK</b>.</p>
+            <p>To edit the added formula, select the result in the cell and click the <b>Add formula</b> button on the right sidebar, make the required changes in the <b>Formula Settings</b> window and click <b>OK</b>.</p>
             <hr />
             <h3>Add references to cells</h3>
             <p>You can use the following arguments to quickly add references to cell ranges:</p>
@@ -44,7 +44,7 @@
             <p>If you have added some <a href="../UsageInstructions/InsertBookmarks.htm" onclick="onhyperlinkclick(this)">bookmarks</a> to certain cells within your table, you can use these bookmarks as arguments when entering formulas.</p>
             <p>In the <b>Formula Settings</b> window, place the cursor within the parentheses in the <b>Formula</b> entry field where you want the argument to be added and use the <b>Paste Bookmark</b> drop-down list to select one of the previously added bookmarks.</p>
             <h3>Update formula results</h3>
-            <p>If you change some values in the table cells, you will need to manually update formula results:</p>
+            <p>If you change some values in the table cells, you will need to manually update the formula results:</p>
             <ul>
                 <li>To update a single formula result, select the necessary result and press <b>F9</b> or right-click the result and use the <b>Update field</b> option from the menu.</li>
                 <li>To update several formula results, select the necessary cells or the entire table and press <b>F9</b>.</li>
@@ -68,7 +68,7 @@
                 <tr>
                     <td>Logical</td>
                     <td>AND(logical1, logical2, ...)</td>
-                    <td>The function is used to check if the logical value you enter is TRUE or FALSE. The function returns 1 (TRUE) if all the arguments are TRUE.</td>
+                    <td>The function is used to check if the logical value you entered is TRUE or FALSE. The function returns 1 (TRUE) if all the arguments are TRUE.</td>
                     <td>=AND(1&gt;0,1&gt;3)<br />Returns 0</td>
                 </tr>
                 <tr>
@@ -94,6 +94,12 @@
                     <td>FALSE()</td>
                     <td>The function returns 0 (FALSE) and does <b>not</b> require any argument.</td>
                     <td>=FALSE<br />Returns 0</td>
+                </tr>
+                <tr>
+                    <td>Logical</td>
+                    <td>IF(logical_test, value_if_true, value_if_false)</td>
+                    <td>The function is used to check the logical expression and return one value if it is TRUE, or another if it is FALSE.</td>
+                    <td>=IF(3&gt;1,1,0)<br />Returns 1</td>
                 </tr>
                 <tr>
                     <td>Mathematical</td>
@@ -122,13 +128,13 @@
                 <tr>
                     <td>Logical</td>
                     <td>NOT(logical)</td>
-                    <td>The function is used to check if the logical value you enter is TRUE or FALSE. The function returns 1 (TRUE) if the argument is FALSE and 0 (FALSE) if the argument is TRUE.</td>
+                    <td>The function is used to check if the logical value you entered is TRUE or FALSE. The function returns 1 (TRUE) if the argument is FALSE and 0 (FALSE) if the argument is TRUE.</td>
                     <td>=NOT(2&lt;5)<br />Returns 0</td>
                 </tr>
                 <tr>
                     <td>Logical</td>
                     <td>OR(logical1, logical2, ...)</td>
-                    <td>The function is used to check if the logical value you enter is TRUE or FALSE. The function returns 0 (FALSE) if all the arguments are FALSE.</td>
+                    <td>The function is used to check if the logical value you entered is TRUE or FALSE. The function returns 0 (FALSE) if all the arguments are FALSE.</td>
                     <td>=OR(1&gt;0,1&gt;3)<br />Returns 1</td>
                 </tr>
                 <tr>
