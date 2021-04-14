@@ -501,7 +501,11 @@ proxy.mailboxes = {
                     hash: h
                 };
                 showMessage(ctx, type, message, cId, function (obj) {
-                    Notify.system(undefined, obj.msg);
+                    if (obj.error) { // {"error": "UNHANDLED" }
+                        console.error(obj, type, message, obj);
+                    } else {
+                        Notify.system(undefined, obj.msg);
+                    }
                     cb();
                 });
             });
