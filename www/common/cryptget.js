@@ -1,16 +1,5 @@
-define([
-    '/bower_components/chainpad-crypto/crypto.js',
-    '/bower_components/chainpad-netflux/chainpad-netflux.js',
-    '/bower_components/netflux-websocket/netflux-client.js',
-    '/common/common-util.js',
-    '/common/common-hash.js',
-    '/common/common-realtime.js',
-    '/common/outer/network-config.js',
-    '/common/outer/cache-store.js',
-    '/common/pinpad.js',
-    '/bower_components/nthen/index.js',
-    '/bower_components/chainpad/chainpad.dist.js',
-], function (Crypto, CPNetflux, Netflux, Util, Hash, Realtime, NetConfig, Cache, Pinpad, nThen) {
+(function () {
+    var factory = function (Crypto, CPNetflux, Netflux, Util, Hash, Realtime, NetConfig, Cache, Pinpad, nThen) {
     var finish = function (S, err, doc) {
         if (S.done) { return; }
         S.cb(err, doc);
@@ -200,4 +189,40 @@ define([
         get: get,
         put: put,
     };
-});
+};
+
+    if (typeof(module) !== 'undefined' && module.exports) {
+        module.exports = factory(
+            require("../bower_components/chainpad-crypto/crypto.js"),
+            require('../bower_components/chainpad-netflux/chainpad-netflux.js'),
+            require('../bower_components/netflux-websocket/netflux-client.js'),
+
+            require('./common-util.js'),
+            require('./common-hash.js'),
+            _.COMMON_REALTIME, //require('./common-realtime.js'), // XXX node
+            _.NETWORK_CONFIG, //require('./outer/network-config.js'), // XXX node
+            _.CACHE_STORE, //require('./outer/cache-store.js'), // XXX node
+            require('./pinpad.js'),
+            require('../bower_components/nthen/index.js'),
+            require('../bower_components/chainpad/chainpad.dist.js')
+        );
+    } else if ((typeof(define) !== 'undefined' && define !== null) && (define.amd !== null)) {
+        define([
+            '/bower_components/chainpad-crypto/crypto.js',
+            '/bower_components/chainpad-netflux/chainpad-netflux.js',
+            '/bower_components/netflux-websocket/netflux-client.js',
+            '/common/common-util.js',
+            '/common/common-hash.js',
+            '/common/common-realtime.js',
+            '/common/outer/network-config.js',
+            '/common/outer/cache-store.js',
+            '/common/pinpad.js',
+            '/bower_components/nthen/index.js',
+            '/bower_components/chainpad/chainpad.dist.js',
+        ], factory);
+    } else {
+        // I'm not gonna bother supporting any other kind of instanciation
+    }
+}());
+
+
