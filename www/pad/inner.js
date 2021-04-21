@@ -746,7 +746,6 @@ define([
             if (!framework.isReadOnly()) {
                 $inner.attr('contenteditable', '' + Boolean(unlocked));
             }
-            $inner.css({ background: unlocked ? '#fff' : '#eee' });
         });
 
         framework.setMediaTagEmbedder(function($mt) {

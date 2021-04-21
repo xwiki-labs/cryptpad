@@ -176,14 +176,22 @@ define([
             // Otherwise, our range element is in a later sibling and we can just substract
             // their length.
             var newOffset = offset;
+            var isInNode;
             for (var i = 0; i < el.childNodes.length; i++) {
+                if (!offset) {
+                    return {
+                        el: el.childNodes[i],
+                        offset: 0
+                    };
+                }
                 try {
                 newOffset -= (getTextNodeValue(el.childNodes[i]) || el.childNodes[i].outerHTML).length;
                 } catch (e) {
                     console.log(el);
                     console.log(el.childNodes[i]);
                 }
-                if (newOffset <= 0) {
+                isInNode = el.childNodes[i].tagName === 'BR' ? newOffset < 0 : newOffset <= 0;
+                if (isInNode) {
                     return getFinalRange(el.childNodes[i], offset);
                 }
                 offset = newOffset;
