@@ -199,7 +199,7 @@
 
             require('./common-util.js'),
             require('./common-hash.js'),
-            _.COMMON_REALTIME, //require('./common-realtime.js'), // XXX node
+            require('./common-realtime.js'),
             _.NETWORK_CONFIG, //require('./outer/network-config.js'), // XXX node
             _.CACHE_STORE, //require('./outer/cache-store.js'), // XXX node
             require('./pinpad.js'),
