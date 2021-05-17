@@ -1,6 +1,6 @@
 // override some modules that cryptget will need to load
 const ws = require('ws');
-require('tweetnacl/nacl-fast');
+require('tweetnacl');
 
 _ = global;
 _.NETWORK_CONFIG = {
