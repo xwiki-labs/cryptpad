@@ -1,5 +1,7 @@
 // override some modules that cryptget will need to load
 const ws = require('ws');
+require('tweetnacl/nacl-fast');
+
 _ = global;
 _.NETWORK_CONFIG = {
     getWebsocketURL: function () {
@@ -36,9 +38,7 @@ if (!parsed || !parsed.hash) {
 }
 
 if (put) {
-    console.log(put);
     Crypt.put(parsed.hash, put, function (err, val) {
-        console.log(arguments);
         if (err) { return console.log('ERROR:' + err); }
         if (!val) { return void console.log('ERROR: Empty'); }
         console.log(val);
