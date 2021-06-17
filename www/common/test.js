@@ -1,4 +1,5 @@
 define([], function () {
+    return function () {};
     if (window.__CRYPTPAD_TEST_OBJ_) { return window.__CRYPTPAD_TEST_OBJ_; }
 
     var locks = [];

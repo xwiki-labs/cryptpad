@@ -1,3 +1,4 @@
+window.__defineGetter__('localStorage', function () { return {}; }); // XXX we need to bump version string for this line
 // Stage 0, this gets cached which means we can't change it. boot2-sframe.js is changable.
 // Note that this file is meant to be executed only inside of a sandbox iframe.
 //
