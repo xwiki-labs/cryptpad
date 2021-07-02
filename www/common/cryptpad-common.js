@@ -125,9 +125,16 @@ define([
                 formSeed = obj;
             }));
         }).nThen(function () {
+            var curvePublic;
+            try {
+                curvePublic = curvePrivate && Hash.getCurvePublicFromPrivate(curvePrivate);
+            } catch (err) {
+                console.error(err);
+            }
+
             cb({
                 curvePrivate: curvePrivate,
-                curvePublic: curvePrivate && Hash.getCurvePublicFromPrivate(curvePrivate),
+                curvePublic: curvePublic,
                 formSeed: formSeed
             });
         });
@@ -148,7 +155,15 @@ define([
         }, function (obj) {
             if (obj && obj.error) {
                 if (obj.error === "ENODRIVE") {
-                    var answered = JSON.parse(localStorage.CP_formAnswered || "[]");
+                    var answered;
+                    try {
+                        answered = JSON.parse(localStorage.CP_formAnswered || "[]");
+                        if (!Array.isArray(answered)) { throw new Error("CP_formAnsweredCorruption"); }
+                    } catch (err) {
+                        console.error(err);
+                        answered = []; // XXX
+                    }
+
                     if (answered.indexOf(data.channel) === -1) { answered.push(data.channel); }
                     localStorage.CP_formAnswered = JSON.stringify(answered);
                     return;

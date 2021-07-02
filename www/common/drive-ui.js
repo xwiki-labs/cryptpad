@@ -180,6 +180,7 @@ define([
             try {
                 path = APP.store[LS_LAST] ? JSON.parse(APP.store[LS_LAST]) : [ROOT];
             } catch (e) {
+                console.error(e);
                 path = [ROOT];
             }
             return path;
@@ -4453,7 +4454,7 @@ define([
                     // Form: get auditor hash
                     var auditorHash;
                     if (parsed.hash && parsed.type === "form") {
-                        var formData = Hash.getFormData(null, parsed.hash, data.password);
+                        var formData = Hash.getFormData(null, parsed.hash, data.password); // XXX drive
                         console.log(formData);
                         if (formData) {
                             auditorHash = formData.form_auditorHash;
@@ -4768,7 +4769,9 @@ define([
             try {
                 onEvDriveChange.stop();
                 onEvDriveRemove.stop();
-            } catch (e) {}
+            } catch (e) {
+                console.error(e);
+            }
         };
 
 

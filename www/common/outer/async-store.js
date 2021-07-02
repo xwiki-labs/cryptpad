@@ -3180,6 +3180,7 @@ define([
 
             store.data = data;
             connect(clientId, data, function (ret) {
+                ret = ret || {};
                 if (Object.keys(store.proxy).length === 1) {
                     Feedback.send("FIRST_APP_USE", true);
                 }
@@ -3188,7 +3189,7 @@ define([
                 }
 
                 var redirect = Constants.prefersDriveRedirectKey;
-                var redirectPreference = Util.find(store, [ 'proxy', 'settings', 'general', redirect, ]);
+                var redirectPreference = Util.find(store, [ 'proxy', 'settings', 'general', redirect ]);
                 ret[redirect] = redirectPreference;
 
                 callback(ret);

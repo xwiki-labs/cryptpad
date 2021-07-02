@@ -644,7 +644,7 @@ Version 4: Data URL when not a realtime link yet (new pad or "static" app)
         return hashes;
     };
 
-    Hash.getFormData = function (secret, hash, password) {
+    Hash.getFormData = function (secret, hash, password) { // XXX drive this can throw and we don't try to catch it
         secret = secret || Hash.getSecrets('form', hash, password);
         var keys = secret && secret.keys;
         var secondary = keys && keys.secondaryKey;
